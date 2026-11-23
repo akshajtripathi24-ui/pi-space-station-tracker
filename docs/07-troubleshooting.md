@@ -16,6 +16,8 @@ sudo systemctl restart isstracker       # restarts the tracker
 | `ModuleNotFoundError: No module named 'sgp4'` | Run `~/isstracker/venv/bin/pip install -r ~/isstracker/requirements.txt`, then restart. |
 | `Address already in use` | Something else uses port 8080, or a second copy is running. Run `sudo systemctl stop isstracker; pkill -f isstracker/server.py; sudo systemctl start isstracker`. |
 | `fatal: destination path … already exists` | It's already installed. Update instead: `cd ~/isstracker && git pull && sudo systemctl restart isstracker`. |
+| `Could not resolve host: github.com` | The Pi isn't connected to the internet. Check the Wi-Fi icon (top right of the Pi's desktop) and reconnect, or run `sudo reboot`. Test with `ping -c 3 github.com`. If `ping -c 3 8.8.8.8` works but that doesn't, the Pi's internet works but it can't look up website names (DNS): reboot the Pi and your router. |
+| A long `hint: Pulling without specifying how to reconcile divergent branches…` message | Harmless. Older versions of git show it on every `git pull`. To hide it, run `cd ~/isstracker && git config pull.ff only` once. |
 
 ## The website
 | Problem | Fix |
