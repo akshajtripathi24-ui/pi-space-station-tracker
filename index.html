@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pi Space Station Tracker</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛰️</text></svg>">
+<link rel="stylesheet" href="/static/leaflet/leaflet.css">
+<script src="/static/leaflet/leaflet.js"></script>
+<style>
+:root{--bg:#070b16;--card:#0f172a;--line:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--accent:#22d3ee;--good:#4ade80;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at top,#0b1430 0%,var(--bg) 60%);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+header{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+header h1{font-size:20px;margin:0;font-weight:800}
+.pill{font-size:12px;padding:4px 10px;border-radius:999px;background:#0b2530;color:var(--accent);border:1px solid #155e75}
+.pill.warn{background:#2a1f05;color:var(--warn);border-color:#854d0e}
+main{max-width:1200px;margin:0 auto;padding:16px;display:grid;gap:16px;grid-template-columns:2fr 1fr}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card h2{font-size:15px;margin:0 0 12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+#map{height:440px;border-radius:10px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:12px}
+.stat{background:#0b1222;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.stat .k{font-size:12px;color:var(--muted)}.stat .v{font-size:20px;font-weight:800;margin-top:2px}
+.big{font-size:34px;font-weight:900;color:var(--accent);margin:4px 0}
+.muted{color:var(--muted);font-size:14px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-weight:600}
+.tag{font-size:12px;padding:2px 8px;border-radius:999px;font-weight:700}
+.tag.yes{background:#052e16;color:var(--good)}.tag.no{background:#1f2937;color:var(--muted)}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+input[type=text],input[type=number]{width:100%;padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:#0b1222;color:var(--text);font-size:15px}
+.row{display:flex;gap:10px}.row>div{flex:1}
+.check{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:14px}
+button{background:var(--accent);color:#04131a;border:0;border-radius:8px;padding:9px 14px;font-weight:800;cursor:pointer;font-size:14px;margin-top:12px}
+button.ghost{background:transparent;color:var(--accent);border:1px solid #155e75}
+code{background:#0b1222;border:1px solid var(--line);padding:3px 7px;border-radius:6px;font-size:14px;word-break:break-all}
+.iss-icon{font-size:30px;line-height:30px;text-align:center;filter:drop-shadow(0 0 6px #22d3ee)}
+.home-icon{font-size:22px;line-height:22px;text-align:center}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
+footer a{color:var(--muted)}
+.msg{font-size:13px;margin-top:8px;min-height:18px}
+.full{grid-column:1/-1}
+</style>
+</head>
+<body>
+<header>
+  <h1>🛰️ Pi Space Station Tracker</h1>
+  <span class="pill" id="status">Connecting…</span>
+</header>
+<main>
+  <section class="card">
+    <h2>Where is the ISS right now?</h2>
+    <div id="map"></div>
+    <div class="stats">
+      <div class="stat"><div class="k">Over</div><div class="v" id="pos">-</div></div>
+      <div class="stat"><div class="k">Altitude</div><div class="v" id="alt">-</div></div>
+      <div class="stat"><div class="k">Speed</div><div class="v" id="spd">-</div></div>
+      <div class="stat"><div class="k">Sunlight</div><div class="v" id="sun">-</div></div>
+      <div class="stat"><div class="k">From your home</div><div class="v" id="home">Set your location</div><div class="k" id="homekm"></div></div>
+    </div>
+    <p class="muted" style="margin:10px 0 0">The dashed line is where it's been, the solid line is where it's going next. The circle shows everywhere on Earth that can see it right now.</p>
+  </section>
+
+  <section class="card">
+    <h2>Next time you can see it</h2>
+    <div id="next"><p class="muted">Set your location below to see when the ISS flies over you.</p></div>
+    <h2 style="margin-top:22px">Who's on board</h2>
+    <div id="crew" class="muted">Loading…</div>
+  </section>
+
+  <section class="card full">
+    <h2>Upcoming passes over your home (next 4 days)</h2>
+    <div id="passes"><p class="muted">Set your location below.</p></div>
+  </section>
+
+  <section class="card">
+    <h2>Your location</h2>
+    <p class="muted">Use your town's coordinates, not your exact address. Two decimal places (about 1 km) is plenty. <a style="color:var(--accent)" href="https://github.com/akshajtripathi24-ui/pi-space-station-tracker/blob/main/docs/03-set-your-location.md" target="_blank">How to find them</a></p>
+    <label for="place">Name (just for you, like "Home")</label><input type="text" id="place" maxlength="60">
+    <div class="row">
+      <div><label for="lat">Latitude</label><input type="number" id="lat" step="0.01" placeholder="e.g. 40.71"></div>
+      <div><label for="lon">Longitude</label><input type="number" id="lon" step="0.01" placeholder="e.g. -74.01"></div>
+    </div>
+    <div class="row">
+      <div><label for="minel">Lowest height to count (°)</label><input type="number" id="minel" min="0" max="60"></div>
+      <div><label for="mins">Alert me this many minutes before</label><input type="number" id="mins" min="1" max="60"></div>
+    </div>
+    <div class="check"><input type="checkbox" id="alerts"><label for="alerts" style="margin:0">Send phone alerts</label></div>
+    <div class="check"><input type="checkbox" id="visonly"><label for="visonly" style="margin:0">Only alert when I can actually see it (dark sky, ISS in sunlight)</label></div>
+    <button id="save">Save</button>
+    <div class="msg" id="savemsg"></div>
+  </section>
+
+  <section class="card">
+    <h2>📱 Phone alerts</h2>
+    <p class="muted">1. Install the free <b>ntfy</b> app (App Store or Google Play). No account needed.</p>
+    <p class="muted">2. In the app, tap <b>+</b> and subscribe to this topic:</p>
+    <p><code id="topic">-</code> <button class="ghost" id="copy" style="margin:0 0 0 6px;padding:5px 10px">Copy</button></p>
+    <p class="muted">3. Tap the button and check your phone:</p>
+    <button id="test">Send test notification</button> <button class="ghost" id="newtopic">New topic</button>
+    <div class="msg" id="testmsg"></div>
+    <p class="muted" style="margin-top:14px">Keep the topic private: anyone who knows it can read your alerts.</p>
+  </section>
+</main>
+<footer>
+  Orbit data from <a href="https://celestrak.org" target="_blank">CelesTrak</a> · crew list from Open Notify · map © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors.<br>
+  A student project, not affiliated with NASA. <a href="https://github.com/akshajtripathi24-ui/pi-space-station-tracker" target="_blank">Code and guide on GitHub</a>
+</footer>
+<script>
+const $ = id => document.getElementById(id);
+const api = (p, opt) => fetch(p, opt).then(async r => { const j = await r.json(); if (!r.ok) throw new Error(j.error || r.status); return j; });
+const fmtTime = t => new Date(t * 1000).toLocaleTimeString([], {hour: 'numeric', minute: '2-digit'});
+const fmtDay = t => {
+  const d = new Date(t * 1000), today = new Date(), tom = new Date(); tom.setDate(today.getDate() + 1);
+  if (d.toDateString() === today.toDateString()) return 'Today';
+  if (d.toDateString() === tom.toDateString()) return 'Tomorrow';
+  return d.toLocaleDateString([], {weekday: 'short', month: 'short', day: 'numeric'});
+};
+const heightWords = el => el >= 70 ? 'almost straight up' : el >= 40 ? 'high in the sky' : el >= 20 ? 'halfway up' : 'low, near the horizon';
+const ocean = (lat, lon) => {   // a rough name for where it is, so the stat isn't just numbers
+  const ns = lat >= 0 ? 'N' : 'S', ew = lon >= 0 ? 'E' : 'W';
+  return `${Math.abs(lat).toFixed(1)}°${ns}, ${Math.abs(lon).toFixed(1)}°${ew}`;
+};
+
+// ---- map
+const map = L.map('map', {worldCopyJump: true, minZoom: 1}).setView([20, 0], 2);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 7, attribution: '© OpenStreetMap contributors'}).addTo(map);
+const issMarker = L.marker([0, 0], {icon: L.divIcon({className: 'iss-icon', html: '🛰️', iconSize: [30, 30]})}).addTo(map);
+const footprint = L.circle([0, 0], {radius: 2200e3, color: '#22d3ee', weight: 1, fillOpacity: 0.06}).addTo(map);
+let pastLine = L.layerGroup().addTo(map), nextLine = L.layerGroup().addTo(map), homeMarker = null, firstFix = true;
+
+function splitAtDateLine(pts) {  // stop the line jumping across the whole map at ±180°
+  const parts = []; let cur = [];
+  pts.forEach((p, i) => {
+    if (i && Math.abs(p[1] - pts[i - 1][1]) > 180) { parts.push(cur); cur = []; }
+    cur.push([p[0], p[1]]);
+  });
+  if (cur.length) parts.push(cur);
+  return parts;
+}
+
+async function loadTrack() {
+  try {
+    const {points} = await api('/api/track');
+    const now = Date.now() / 1000;
+    pastLine.clearLayers(); nextLine.clearLayers();
+    splitAtDateLine(points.filter(p => p[2] <= now)).forEach(s => L.polyline(s, {color: '#64748b', weight: 2, dashArray: '6 6'}).addTo(pastLine));
+    splitAtDateLine(points.filter(p => p[2] >= now - 30)).forEach(s => L.polyline(s, {color: '#22d3ee', weight: 3}).addTo(nextLine));
+  } catch (e) {}
+}
+
+async function loadNow() {
+  try {
+    const d = await api('/api/now'), s = d.iss;
+    issMarker.setLatLng([s.lat, s.lon]);
+    footprint.setLatLng([s.lat, s.lon]);
+    footprint.setRadius(6371e3 * Math.acos(6371 / (6371 + s.alt_km)));
+    if (firstFix) { map.setView([s.lat, s.lon], 2); firstFix = false; }
+    $('pos').textContent = ocean(s.lat, s.lon);
+    $('alt').textContent = Math.round(s.alt_km) + ' km';
+    $('spd').textContent = Math.round(s.speed_kmh).toLocaleString() + ' km/h';
+    $('sun').textContent = s.sunlit ? '☀️ In sunlight' : '🌑 In Earth\'s shadow';
+    if (d.from_home) {
+      const h = d.from_home;
+      $('homekm').textContent = h.km.toLocaleString() + ' km away';
+      $('home').textContent = h.el > 0 ? `☝️ ${h.el}° up, look ${h.dir}!` : `Below horizon`;
+    }
+    if (d.home && d.home.lat != null) {
+      if (!homeMarker) homeMarker = L.marker([d.home.lat, d.home.lon], {icon: L.divIcon({className: 'home-icon', html: '🏠', iconSize: [22, 22]})}).addTo(map);
+      homeMarker.setLatLng([d.home.lat, d.home.lon]);
+    }
+    const st = $('status');
+    if (d.tle_error) { st.textContent = '⚠️ Using saved orbit data'; st.className = 'pill warn'; st.title = d.tle_error; }
+    else { st.textContent = '● Live'; st.className = 'pill'; st.title = d.tle_age_h != null ? `Orbit data is ${d.tle_age_h} hours old` : ''; }
+  } catch (e) {
+    $('status').textContent = '⚠️ ' + e.message; $('status').className = 'pill warn';
+  }
+}
+
+let passes = [];
+async function loadPasses() {
+  try { passes = (await api('/api/passes')).passes; } catch (e) { passes = []; }
+  if (!passes.length) return;
+  $('passes').innerHTML = '<table><tr><th>Day</th><th>Time</th><th>Highest</th><th>Where to look</th><th>Length</th><th>Can you see it?</th></tr>' +
+    passes.slice(0, 20).map(p => `<tr><td>${fmtDay(p.start)}</td><td>${fmtTime(p.start)}</td><td>${p.max_el}°</td>` +
+      `<td>${p.start_dir} → ${p.end_dir}</td><td>${p.minutes} min</td>` +
+      `<td>${p.visible ? '<span class="tag yes">👀 Yes</span>' : '<span class="tag no">No</span>'}</td></tr>`).join('') + '</table>';
+}
+
+function showNext() {
+  const now = Date.now() / 1000, next = passes.find(p => p.visible && (p.vis_end || p.end) > now);
+  if (!passes.length) return;
+  if (!next) { $('next').innerHTML = '<p class="muted">No visible passes in the next 4 days. The ISS still flies over, but in daylight or in Earth\'s shadow. Check back soon!</p>'; return; }
+  const start = next.vis_start, left = start - now;
+  const when = left <= 0 ? '👀 Look up now!' : left < 3600 ? `in ${Math.floor(left / 60)}m ${Math.floor(left % 60)}s` :
+    `in ${Math.floor(left / 3600)}h ${Math.floor(left % 3600 / 60)}m`;
+  $('next').innerHTML = `<div class="big">${when}</div>
+    <p><b>${fmtDay(start)} at ${fmtTime(start)}</b></p>
+    <p class="muted">Look <b>${next.vis_start_dir}</b>. It climbs to <b>${next.max_el}°</b> (${heightWords(next.max_el)}) and fades out in the <b>${next.vis_end_dir}</b> at ${fmtTime(next.vis_end)}.</p>
+    <p class="muted">You'll see a bright, steady dot moving fast across the sky. No blinking lights, so it's not a plane!</p>`;
+}
+
+async function loadCrew() {
+  try {
+    const {iss_crew} = await api('/api/crew');
+    $('crew').innerHTML = iss_crew.length ? `<b style="color:var(--text)">${iss_crew.length} people</b> are living on the ISS right now:<br>` + iss_crew.join(', ') : 'Crew list unavailable right now.';
+  } catch (e) { $('crew').textContent = 'Crew list unavailable right now.'; }
+}
+
+async function loadSettings() {
+  const c = await api('/api/settings');
+  $('place').value = c.place || ''; $('lat').value = c.lat ?? ''; $('lon').value = c.lon ?? '';
+  $('minel').value = c.min_elevation; $('mins').value = c.alert_minutes;
+  $('alerts').checked = c.alerts_on; $('visonly').checked = c.visible_only; $('topic').textContent = c.ntfy_topic;
+}
+
+$('save').onclick = async () => {
+  $('savemsg').textContent = 'Saving…';
+  try {
+    await api('/api/settings', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
+      place: $('place').value, lat: $('lat').value, lon: $('lon').value, min_elevation: $('minel').value,
+      alert_minutes: $('mins').value, alerts_on: $('alerts').checked, visible_only: $('visonly').checked})});
+    $('savemsg').textContent = '✅ Saved! Working out your passes…';
+    await loadPasses(); showNext(); loadNow();
+    $('savemsg').textContent = '✅ Saved!';
+  } catch (e) { $('savemsg').textContent = '❌ ' + e.message; }
+};
+$('test').onclick = async () => {
+  $('testmsg').textContent = 'Sending…';
+  try { await api('/api/test-alert', {method: 'POST'}); $('testmsg').textContent = '✅ Sent! Check your phone.'; }
+  catch (e) { $('testmsg').textContent = '❌ ' + e.message; }
+};
+$('newtopic').onclick = async () => {
+  if (!confirm('Make a new topic? You will need to subscribe to the new one in the ntfy app.')) return;
+  const c = await api('/api/new-topic', {method: 'POST'}); $('topic').textContent = c.ntfy_topic;
+};
+$('copy').onclick = () => { navigator.clipboard && navigator.clipboard.writeText($('topic').textContent); $('copy').textContent = 'Copied!'; setTimeout(() => $('copy').textContent = 'Copy', 1500); };
+
+loadSettings(); loadNow(); loadTrack(); loadCrew();
+loadPasses().then(showNext);
+setInterval(loadNow, 2000);
+setInterval(showNext, 1000);
+setInterval(loadTrack, 60000);
+setInterval(() => loadPasses().then(showNext), 120000);
+</script>
+</body>
+</html>
