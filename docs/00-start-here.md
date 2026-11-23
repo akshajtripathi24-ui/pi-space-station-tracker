@@ -68,7 +68,7 @@ bash setup-autostart.sh
 - Tap **Tiangong** or **Hubble** at the top to track China's space station or the Hubble telescope.
 - Tap **miles** if you prefer miles to kilometers.
 - Tap any pass in the table to see its **🧭 sky chart**.
-- Press **▶ Start NASA's live video** to watch Earth from space.
+- With **ISS** selected, press **▶ Start NASA's live video** to watch Earth from space.
 - Tick **Morning summary** in the settings to get the day's passes each morning.
 
 ✅ You're done when you've found your favorite. 🛰️

@@ -33,7 +33,7 @@ The 🏠 appears on the map and the **Upcoming passes** table fills in.
 | **Send alerts for** | Which spacecraft send alerts: ISS, Tiangong and/or Hubble | ISS only |
 | **Morning summary** | One message each morning listing the day's visible passes, at the time you pick | On, 8:00 AM |
 | **Check the cloud forecast** | Shows the forecast clouds for each visible pass, and adds it to alerts | On |
-| **Live video link** | Leave empty for NASA's live video, or paste a YouTube link to a different live video | Empty |
+| **ISS live video link** | Leave empty for NASA's live video, or paste a YouTube link to a different live video of the ISS | Empty |
 
 Press **Save** after changing any of them.
 

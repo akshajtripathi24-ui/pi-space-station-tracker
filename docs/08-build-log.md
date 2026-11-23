@@ -77,4 +77,16 @@ Version 1.1 added km/miles, day/night shading, the morning summary, fun stats, t
 **Fix:** It says "the ISS", but just "Tiangong" and "Hubble".
 
 ## Part 3: Running it on the real Pi
-*Problems from installing and running it on a real Raspberry Pi 4 will be added here.*
+Problems from installing, updating and running it on a real Raspberry Pi 4.
+
+### 18. `git pull` said "Could not resolve host: github.com"
+**Problem:** The first update to version 1.1 failed. The screen filled with a long yellow `hint: Pulling without specifying how to reconcile divergent branches…` message, and the last line said `fatal: unable to access 'https://github.com/…': Could not resolve host: github.com`.
+**Cause:** The Pi wasn't connected to the internet, so it couldn't find GitHub. The yellow hint wasn't the problem: older versions of git show it on every pull.
+**Fix:** Reconnected the Pi to the internet, then ran the update command again. It worked. To hide the yellow hint, run `git config pull.ff only` once in `~/isstracker`.
+**Lesson:** When a command prints a lot, read the **last line** first. That's usually the real error.
+
+### 19. Tiangong and Hubble showed the ISS's live video
+**Good news first:** NASA's live video worked on the real Pi. It couldn't be tested while building, because YouTube was blocked there.
+**Problem:** The live video stayed the same when switching to Tiangong or Hubble. That made it look like a video from Tiangong or Hubble, but it was really the ISS.
+**Cause:** Only the ISS has a live video you can watch any time. Tiangong only streams during special events (launches, spacewalks, science classes), and Hubble has no video camera at all. Its cameras point at stars and galaxies.
+**Fix:** The live video now only plays when **ISS** is selected. For Tiangong and Hubble, the card says why there's no live video and has a **Watch the ISS live instead** button. Switching away from the ISS also stops the video. A test checked all of this: the ISS video starts, clicking ISS again doesn't restart it, Tiangong and Hubble show their messages, and the button switches back to the ISS and starts the video.

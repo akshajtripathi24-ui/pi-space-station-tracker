@@ -32,6 +32,7 @@ sudo systemctl restart isstracker       # restarts the tracker
 | Hubble's passes table is empty | Normal if you live far from the equator. Hubble's path never goes farther than 28.5° north or south, so it may never get above your **Lowest height to count**. Try setting it to 5°. |
 | The **Clouds** column shows **-** | The forecast only covers the next 5 days, only visible passes get one, and it's hidden when **Check the cloud forecast** is off. If it's always **-**, the Pi can't reach Open-Meteo: `ping -c 3 api.open-meteo.com` |
 | The live video says "unavailable" or is black | NASA isn't streaming right now, or the station is on the night side of Earth (every 45 minutes). Try later, or paste a different live video link in the settings. |
+| No live video for Tiangong or Hubble | Normal. Only the ISS has a live video you can watch any time. Press **Watch the ISS live instead**. |
 | The numbers changed to miles (or km) | Tap **km** or **miles** at the top of the page. Each device remembers its own choice. |
 
 ## Times and alerts

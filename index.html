@@ -111,12 +111,9 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0 4px}
   </section>
 
   <section class="card">
-    <h2>📺 Live view from space</h2>
-    <div class="video" id="video">
-      <button id="playvideo" style="margin:0">▶ Start NASA's live video</button>
-      <p class="muted" style="margin:10px 0 0">Live video from NASA's YouTube channel</p>
-    </div>
-    <p class="muted">It's live, so sometimes it's black (the station is on the night side of Earth, which happens every 45 minutes), shows "please stand by", or isn't streaming at all. That's normal. You can paste a different live video link in the settings below. <a href="https://www.youtube.com/@NASA/streams" target="_blank" rel="noopener">NASA's live videos on YouTube</a></p>
+    <h2 id="videotitle">📺 Live view from the ISS</h2>
+    <div class="video" id="video"></div>
+    <p class="muted" id="videonote"></p>
   </section>
 
   <section class="card">
@@ -147,7 +144,7 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0 4px}
     </div>
     <div class="check"><input type="checkbox" id="summary"><label for="summary" style="margin:0">Morning summary of the day's visible passes at</label> <select id="sumhour" aria-label="Morning summary time"></select></div>
     <div class="check"><input type="checkbox" id="weather"><label for="weather" style="margin:0">Check the cloud forecast for each pass</label></div>
-    <label for="videourl">Live video link (optional: leave empty for NASA's live video)</label>
+    <label for="videourl">ISS live video link (optional: leave empty for NASA's live video)</label>
     <input type="text" id="videourl" placeholder="https://www.youtube.com/watch?v=...">
     <button id="save">Save</button>
     <div class="msg" id="savemsg"></div>
@@ -222,6 +219,7 @@ function pickSat(s) {
   ['pos', 'alt', 'spd', 'sun', 'today', 'orbits', 'lap', 'sunrises'].forEach(id => $(id).textContent = '-');
   $('passes').innerHTML = '<p class="muted">Working out the passes…</p>';
   loadNow(); loadTrack(); loadCrew(); loadPasses().then(showNext);
+  showVideoCard();
 }
 document.querySelectorAll('#satpick button').forEach(b => b.onclick = () => pickSat(b.dataset.sat));
 
@@ -462,17 +460,42 @@ function embedUrl(u) {
     return x.protocol === 'https:' ? x.href : null;
   } catch (e) { return null; }
 }
-let videoUrl = '';
-$('playvideo').onclick = () => {
+let videoUrl = '', videoFor = null;
+// Only the ISS has a live video you can watch any time, so the others explain why there isn't one.
+const NO_VIDEO = {
+  tiangong: {icon: '🛰️', text: 'Tiangong doesn\'t have a live video you can watch any time. China\'s space agency only streams from it during special events, like launches, spacewalks and science classes from space.'},
+  hubble: {icon: '🔭', text: 'Hubble doesn\'t have a live video camera. Its cameras point at stars and galaxies far away, not at Earth, and take long-exposure photos instead of video.',
+           note: '<a href="https://esahubble.org/images/" target="_blank" rel="noopener">See Hubble\'s latest pictures</a>'}
+};
+function showVideoCard() {
+  if (videoFor === sat) return;          // don't stop a video that's already playing
+  videoFor = sat;
+  $('videotitle').textContent = `📺 Live view from ${theName()}`;
+  if (sat === 'iss') {
+    $('video').innerHTML = '<button id="playvideo" style="margin:0">▶ Start NASA\'s live video</button>' +
+      '<p class="muted" style="margin:10px 0 0">Live video from the ISS on NASA\'s YouTube channel</p>';
+    $('playvideo').onclick = startVideo;
+    $('videonote').innerHTML = 'It\'s live, so sometimes it\'s black (the station is on the night side of Earth, which happens every 45 minutes), ' +
+      'shows "please stand by", or isn\'t streaming at all. That\'s normal. You can paste a different live video link in the settings below. ' +
+      '<a href="https://www.youtube.com/@NASA/streams" target="_blank" rel="noopener">NASA\'s live videos on YouTube</a>';
+  } else {
+    const n = NO_VIDEO[sat];
+    $('video').innerHTML = `<div style="font-size:44px">${n.icon}</div><p style="margin:8px 0 6px;font-weight:800">No live video from ${esc(satName())}</p>` +
+      `<p class="muted" style="margin:0;max-width:440px">${n.text}</p><button class="ghost" id="toiss">🛰️ Watch the ISS live instead</button>`;
+    $('toiss').onclick = () => { pickSat('iss'); startVideo(); };
+    $('videonote').innerHTML = n.note || '';
+  }
+}
+function startVideo() {
   const src = embedUrl(videoUrl);
   if (!src) { $('video').insertAdjacentHTML('beforeend', '<p class="muted">That video link doesn\'t work. Check it in the settings.</p>'); return; }
   $('video').innerHTML = '';
   const f = document.createElement('iframe');
-  f.src = src; f.title = 'Live view from space';
+  f.src = src; f.title = 'Live view from the ISS';
   f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen'; f.allowFullscreen = true;
   f.referrerPolicy = 'strict-origin-when-cross-origin';
   $('video').appendChild(f);
-};
+}
 
 // ---- settings
 for (let h = 0; h < 24; h++) $('sumhour').insertAdjacentHTML('beforeend',

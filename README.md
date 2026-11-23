@@ -18,7 +18,7 @@ You only need the Pi. No sensors, wires or add-on boards. Open it on any phone, 
 - **⏱️ Countdown** to the next pass you can see, with plain-English directions ("Look NW. It climbs halfway up and fades out in the E").
 - **📱 Phone alerts:** a notification a few minutes before a visible pass, using the free ntfy app. No account needed.
 - **🌅 Morning summary:** one message each morning listing the day's visible passes.
-- **📺 Live view from space:** NASA's live video, right on the page.
+- **📺 Live view from the ISS:** NASA's live video, right on the page. (Tiangong and Hubble don't have a live video you can watch, so the page explains why.)
 - **👩‍🚀 Who's on board:** the names of the astronauts on the ISS and Tiangong right now.
 - **Runs by itself:** starts when the Pi boots, restarts if it crashes, updates its orbit data twice a day, and updates with one command.
 - **Private:** your location stays on your Pi. It's never uploaded anywhere.
