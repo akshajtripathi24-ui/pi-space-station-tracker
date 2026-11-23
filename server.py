@@ -16,6 +16,10 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
 from sgp4.api import Satrec
+try:
+    from sgp4 import omm      # reads the newer OMM format (only Starlink needs it)
+except ImportError:
+    omm = None
 
 import places   # places.py: "Brazil" or "Pacific Ocean" from a latitude and longitude
 import sky      # sky.py: where the Moon and planets are
@@ -30,7 +34,8 @@ SIGHTINGS_FILE = os.path.join(DATA, "sightings.json")  # your spotter log
 HISTORY_FILE = os.path.join(DATA, "history.json")    # the height of each spacecraft from every orbit download
 
 TLE_URL = "https://celestrak.org/NORAD/elements/gp.php?CATNR={}&FORMAT=TLE"
-GROUP_URL = "https://celestrak.org/NORAD/elements/gp.php?GROUP={}&FORMAT=TLE"
+# Groups use the newer OMM format (as JSON): new satellites have 6-digit catalog numbers, which don't fit in a TLE
+GROUP_URL = "https://celestrak.org/NORAD/elements/gp.php?GROUP={}&FORMAT=json"
 CREW_URL = "http://api.open-notify.org/astros.json"
 WEATHER_URL = "https://api.open-meteo.com/v1/forecast?latitude={:.2f}&longitude={:.2f}&hourly=cloud_cover&forecast_days=5"
 UA = "pi-space-station-tracker/1.2 (+https://github.com/akshajtripathi24-ui/pi-space-station-tracker)"
@@ -47,8 +52,9 @@ SATS = {
     "hubble": {"name": "Hubble", "full": "Hubble Space Telescope", "catnr": 20580, "crew": None,
                "launched": "1990-04-24", "std_mag": 2.2},
     # The newest Starlink launch: a "train" of satellites in a line, picked from everything launched in the last 30 days
+    # (if that list fails, it tries the list of every Starlink satellite, which is much bigger)
     "starlink": {"name": "Starlink", "full": "Starlink train (the newest SpaceX launch)", "group": "last-30-days",
-                 "crew": None, "launched": None, "std_mag": 4.0},
+                 "backup_group": "starlink", "crew": None, "launched": None, "std_mag": 4.0},
 }
 
 # ---------------------------------------------------------------- settings
@@ -120,7 +126,7 @@ _orbit = {sid: {"rec": None, "train": [], "fetched": 0.0, "error": "", "launched
 
 
 def tle_file(sid):
-    return os.path.join(DATA, "tle_%s.txt" % sid)
+    return os.path.join(DATA, ("%s.json" if SATS[sid].get("group") else "tle_%s.txt") % sid)
 
 
 def tle_epoch(rec):
@@ -128,42 +134,54 @@ def tle_epoch(rec):
     return (rec.jdsatepoch + rec.jdsatepochF - 2440587.5) * 86400
 
 
-def _parse_tles(text):
+def _use_tle(sid, text, fetched_at):
+    """Read orbit data in the classic two-line (TLE) format."""
     lines = [l.strip() for l in text.strip().splitlines() if l.strip()]
-    out = []
-    for i, l in enumerate(lines):
-        if l.startswith("1 ") and i + 1 < len(lines) and lines[i + 1].startswith("2 "):
-            name = lines[i - 1] if i > 0 and not lines[i - 1][:2] in ("1 ", "2 ") else ""
-            out.append((name, l, lines[i + 1]))
-    return out
+    l1 = next((l for l in lines if l.startswith("1 ")), None)
+    l2 = next((l for l in lines if l.startswith("2 ")), None)
+    if not l1 or not l2:
+        raise ValueError("no TLE lines found")
+    rec = Satrec.twoline2rv(l1, l2)
+    _orbit[sid].update(rec=rec, fetched=fetched_at, error="")
+    record_history(sid, rec)
+    return text.strip() + "\n"
 
 
-def newest_starlink_launch(tles):
+def _satrec_from_omm(fields):
+    if omm is None:
+        raise ValueError("the sgp4 package is too old. Run: ~/isstracker/venv/bin/pip install -U sgp4")
+    f = dict(fields)
+    if int(f.get("NORAD_CAT_ID") or 0) > 99999:
+        f["NORAD_CAT_ID"] = 0        # older versions of the sgp4 package only take 5-digit numbers (it's just a label)
+    if "." not in f["EPOCH"]:
+        f["EPOCH"] += ".0"
+    rec = Satrec()
+    omm.initialize(rec, f)
+    return rec
+
+
+def newest_starlink_launch(records):
     """Keep only the Starlink satellites from the newest launch. They fly in a line: the "train"."""
     launches = {}
-    for t in tles:
-        if t[0].upper().startswith("STARLINK"):
-            launches.setdefault(t[1][9:14], []).append(t)   # e.g. "26045" = 2026, launch number 45
-    if not launches:
-        return []
-    return launches[max(launches)]
+    for r in records:
+        if str(r.get("OBJECT_NAME", "")).upper().startswith("STARLINK") and r.get("OBJECT_ID"):
+            launches.setdefault(r["OBJECT_ID"][:8], []).append(r)   # e.g. "2026-215" = 2026, launch number 215
+    return sorted(launches[max(launches)], key=lambda r: r["OBJECT_ID"]) if launches else []
 
 
-def _use_tle(sid, text, fetched_at):
-    """Read orbit data. Returns the text worth saving."""
-    tles = _parse_tles(text)
-    group = SATS[sid].get("group")
-    if group:
-        tles = newest_starlink_launch(tles)
-    if not tles:
-        raise ValueError("no Starlink launches in the last 30 days" if group else "no TLE lines found")
-    recs = [Satrec.twoline2rv(l1, l2) for _, l1, l2 in tles]
-    lead = recs[len(recs) // 2]                           # for a train, the satellite in the middle
-    _orbit[sid].update(rec=lead, train=recs if group else [], fetched=fetched_at, error="",
-                       launched=min(tle_epoch(r) for r in recs) if group else None)
-    if not group:
-        record_history(sid, lead)
-    return "\n".join("\n".join(t) if t[0] else t[1] + "\n" + t[2] for t in tles) + "\n"
+def _use_group(sid, text, fetched_at):
+    """Read a group of satellites in the OMM format (JSON) and keep the newest Starlink train."""
+    try:
+        records = json.loads(text)
+    except ValueError:
+        raise ValueError("CelesTrak didn't send orbit data: " + text.strip()[:60])
+    train = newest_starlink_launch(records if isinstance(records, list) else [])
+    if not train:
+        raise ValueError("no Starlink satellites in that list")
+    recs = [_satrec_from_omm(r) for r in train]
+    _orbit[sid].update(rec=recs[len(recs) // 2], train=recs, fetched=fetched_at, error="",   # follow the middle one
+                       launched=min(tle_epoch(r) for r in recs))
+    return json.dumps(train)
 
 
 def load_saved_tle(sid):
@@ -173,9 +191,9 @@ def load_saved_tle(sid):
         if path and os.path.exists(path):              # (iss_tle.txt is where version 1.0 saved it)
             try:
                 with open(path) as f:
-                    _use_tle(sid, f.read(), os.path.getmtime(path))
+                    (_use_group if SATS[sid].get("group") else _use_tle)(sid, f.read(), os.path.getmtime(path))
                 return
-            except (OSError, ValueError) as e:
+            except (OSError, ValueError, KeyError) as e:
                 log("saved orbit data unreadable:", path, e)
 
 
@@ -188,17 +206,23 @@ def refresh_tle(sid, force=False):
         return
     s = SATS[sid]
     try:
-        text = http_get(GROUP_URL.format(s["group"]) if s.get("group") else TLE_URL.format(s["catnr"]))
-        keep = _use_tle(sid, text, time.time())
+        if s.get("group"):
+            try:
+                keep = _use_group(sid, http_get(GROUP_URL.format(s["group"])), time.time())
+            except Exception as e:
+                log("couldn't use the", s["group"], "list (%s), trying the" % e, s["backup_group"], "list")
+                keep = _use_group(sid, http_get(GROUP_URL.format(s["backup_group"]), timeout=90), time.time())
+        else:
+            keep = _use_tle(sid, http_get(TLE_URL.format(s["catnr"])), time.time())
         with open(tle_file(sid), "w") as f:
             f.write(keep)
         log("downloaded fresh orbit data for", s["name"])
         _passes.pop(sid, None)        # recalculate passes with the new data
-    except Exception as e:            # keep using the saved copy
-        o["error"] = "Couldn't download fresh orbit data (%s). Using the saved copy." % e
-        if s.get("group") and isinstance(e, ValueError):
-            o["error"] = "There's no Starlink train right now (no Starlink launches in the last 30 days)."
-            o.update(rec=None, train=[])
+    except Exception as e:            # keep using the saved copy, if there is one
+        if o["rec"] is None:
+            o["error"] = "Couldn't download the %s orbit data (%s)." % (s["name"], e)
+        else:
+            o["error"] = "Couldn't download fresh orbit data (%s). Using the saved copy." % e
         log(s["name"], o["error"])
 
 # ---------------------------------------------------------------- height history ("watch the ISS fall")

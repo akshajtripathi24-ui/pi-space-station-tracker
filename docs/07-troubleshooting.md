@@ -35,6 +35,7 @@ sudo systemctl restart isstracker       # restarts the tracker
 | No live video for Tiangong or Hubble | Normal. Only the ISS has a live video you can watch any time. Press **Watch the ISS live instead**. |
 | The numbers changed to miles (or km) | Tap **km** or **miles** at the top of the page. Each device remembers its own choice. |
 | Starlink says there's no train | No Starlink launches in the last 30 days, or the Pi couldn't download the list. Try again after the next SpaceX launch. |
+| `Couldn't download … (HTTP Error 404: Not Found)` for Starlink | Update to the newest version (`cd ~/isstracker && git pull && sudo systemctl restart isstracker`). Version 1.2 asked for Starlink in the old TLE format, which CelesTrak no longer sends for new satellites. See [build log #29](08-build-log.md). |
 | The talking countdown is silent | Keep the page open and the screen on. Check the volume, and on iPhone turn off silent mode. Tap the button off and on again: you should hear "Talking countdown is on". |
 | No **👀 I saw it!** button | It only appears for **visible** passes of the spacecraft you're looking at, from when the pass starts until 6 hours after it ends. |
 | "Watch the ISS fall" says collecting data | Normal for the first few days. It saves one point each time new orbit data is downloaded (twice a day). |
