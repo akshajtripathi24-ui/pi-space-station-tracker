@@ -2,27 +2,37 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Pi Space Station Tracker</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛰️</text></svg>">
+<!-- so it can go on your phone's home screen like an app -->
+<link rel="manifest" href="/static/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<meta name="theme-color" content="#0f172a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ISS Tracker">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="stylesheet" href="/static/leaflet/leaflet.css">
 <script src="/static/leaflet/leaflet.js"></script>
 <style>
 :root{--bg:#070b16;--card:#0f172a;--line:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--accent:#22d3ee;--good:#4ade80;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
-body{margin:0;background:radial-gradient(ellipse at top,#0b1430 0%,var(--bg) 60%);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+body{margin:0;background:radial-gradient(ellipse at top,#0b1430 0%,var(--bg) 60%);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;padding:env(safe-area-inset-top) 0 0}
 header{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
 header h1{font-size:20px;margin:0;font-weight:800}
 .pill{font-size:12px;padding:4px 10px;border-radius:999px;background:#0b2530;color:var(--accent);border:1px solid #155e75}
 .pill.warn{background:#2a1f05;color:var(--warn);border-color:#854d0e}
 .controls{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
-.seg{display:inline-flex;border:1px solid #155e75;border-radius:10px;overflow:hidden}
+.seg{display:inline-flex;border:1px solid #155e75;border-radius:10px;overflow:hidden;flex-wrap:wrap}
 .seg button{margin:0;border-radius:0;background:transparent;color:var(--accent);padding:7px 12px;font-size:13px}
 .seg button.on{background:var(--accent);color:#04131a}
 main{max-width:1200px;margin:0 auto;padding:16px;display:grid;gap:16px;grid-template-columns:2fr 1fr}
 @media(max-width:900px){main{grid-template-columns:1fr}.controls{margin-left:0}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
 .card h2{font-size:15px;margin:0 0 12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.card h3{font-size:14px;margin:18px 0 8px;color:var(--muted)}
+.cardhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
 #map{height:440px;border-radius:10px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:12px}
 .stat{background:#0b1222;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
@@ -34,19 +44,22 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:grid;gap:16px;grid-temp
 table{width:100%;border-collapse:collapse;font-size:14px}
 th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--muted);font-weight:600}
 tr.pass{cursor:pointer}tr.pass:hover{background:#111c33}tr.pass.sel{background:#0b2530}
+td .sub{display:block;font-size:12px;color:var(--muted)}
 .tag{font-size:12px;padding:2px 8px;border-radius:999px;font-weight:700}
-.tag.yes{background:#052e16;color:var(--good)}.tag.no{background:#1f2937;color:var(--muted)}
+.tag.yes{background:#052e16;color:var(--good)}.tag.no{background:#1f2937;color:var(--muted)}.tag.now{background:#0b2530;color:var(--accent)}
 .cloud{font-size:13px}.cloud.clear{color:var(--good)}.cloud.part{color:var(--warn)}.cloud.cloudy{color:var(--bad)}
+.stars{letter-spacing:1px;font-size:13px}
 label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
 input[type=text],input[type=number],select{width:100%;padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:#0b1222;color:var(--text);font-size:15px}
 .row{display:flex;gap:10px}.row>div{flex:1}
 .check{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:14px}
 .check select{width:auto;padding:4px 6px;font-size:14px}
 .checks{display:flex;gap:16px;flex-wrap:wrap}
-button{background:var(--accent);color:#04131a;border:0;border-radius:8px;padding:9px 14px;font-weight:800;cursor:pointer;font-size:14px;margin-top:12px}
-button.ghost{background:transparent;color:var(--accent);border:1px solid #155e75}
+button,a.btn{background:var(--accent);color:#04131a;border:0;border-radius:8px;padding:9px 14px;font-weight:800;cursor:pointer;font-size:14px;margin-top:12px;text-decoration:none;display:inline-block;font-family:inherit}
+button.ghost,a.btn.ghost{background:transparent;color:var(--accent);border:1px solid #155e75}
+a.btn.small,button.small{padding:6px 10px;font-size:13px;margin:0}
 code{background:#0b1222;border:1px solid var(--line);padding:3px 7px;border-radius:6px;font-size:14px;word-break:break-all}
-.iss-icon{font-size:30px;line-height:30px;text-align:center;filter:drop-shadow(0 0 6px #22d3ee)}
+.iss-icon{font-size:30px;line-height:30px;text-align:center;filter:drop-shadow(0 0 6px #22d3ee)}.iss-icon.small{font-size:16px;line-height:16px}
 .home-icon{font-size:22px;line-height:22px;text-align:center}
 .sun-icon{font-size:22px;line-height:22px;text-align:center;filter:drop-shadow(0 0 8px #fbbf24)}
 .sky{width:100%;max-width:300px;display:block;margin:6px auto 0}
@@ -55,6 +68,26 @@ code{background:#0b1222;border:1px solid var(--line);padding:3px 7px;border-radi
 .sky .dim{fill:none;stroke:#64748b;stroke-width:2;stroke-dasharray:4 5}
 .sky text{fill:var(--muted);font-size:11px;font-family:inherit}.sky .dir{fill:var(--text);font-weight:800;font-size:13px}
 .sky .lbl{fill:var(--text);font-size:11px;font-weight:700;paint-order:stroke;stroke:#0b1222;stroke-width:4px;stroke-linejoin:round}
+.sky .body{fill:var(--muted);font-size:10px;font-weight:600;paint-order:stroke;stroke:#0b1222;stroke-width:3px}
+.sawit{background:#0b2530;border:1px solid #155e75;border-radius:12px;padding:12px;margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.sawit button{margin:0}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px}
+.badge{background:#0b1222;border:1px solid var(--line);border-radius:12px;padding:10px 8px;text-align:center}
+.badge .be{font-size:28px}.badge .bn{font-size:13px;font-weight:800;margin-top:4px}.badge .bh{font-size:11px;color:var(--muted);margin-top:2px}
+.badge.locked .be{filter:grayscale(1);opacity:.35}.badge.locked .bn{color:var(--muted)}
+.badge.earned{border-color:#155e75;background:#0b2530}
+.spotcount{display:flex;align-items:baseline;gap:10px;margin-bottom:12px}
+.list{list-style:none;padding:0;margin:0}.list li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.x{background:transparent;color:var(--muted);border:1px solid var(--line);padding:2px 8px;margin:0;font-size:12px}
+.planet{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.planet .dot{width:12px;height:12px;border-radius:50%;margin-top:4px;flex:none}
+.moon{display:flex;gap:14px;align-items:center;margin-bottom:8px}.moon .e{font-size:48px;line-height:1}
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto;touch-action:pan-y}
+.chart .axis{fill:var(--muted);font-size:11px}.chart .gridl{stroke:#1e293b;stroke-width:1}
+.tip{position:absolute;pointer-events:none;background:#0b1222;border:1px solid #334155;border-radius:8px;padding:6px 9px;font-size:12px;white-space:nowrap;display:none;color:var(--text)}
+.statrow{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:10px}.statrow .v{font-size:22px;font-weight:800}.statrow .k{font-size:12px;color:var(--muted)}
+details summary{cursor:pointer;color:var(--accent);font-size:13px;margin-top:8px}
 .video{position:relative;aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:10px}
 .video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
@@ -70,7 +103,7 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0 4px}
   <span class="pill" id="status">Connecting…</span>
   <div class="controls">
     <div class="seg" id="satpick" title="Which spacecraft to track">
-      <button data-sat="iss" class="on">🛰️ ISS</button><button data-sat="tiangong">🛰️ Tiangong</button><button data-sat="hubble">🔭 Hubble</button>
+      <button data-sat="iss" class="on">🛰️ ISS</button><button data-sat="tiangong">🛰️ Tiangong</button><button data-sat="hubble">🔭 Hubble</button><button data-sat="starlink">✨ Starlink</button>
     </div>
     <div class="seg" id="unitpick" title="Kilometers or miles">
       <button data-u="km" class="on">km</button><button data-u="mi">miles</button>
@@ -82,7 +115,7 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0 4px}
     <h2 id="maptitle">Where is the ISS right now?</h2>
     <div id="map"></div>
     <div class="stats">
-      <div class="stat"><div class="k">Over</div><div class="v" id="pos">-</div></div>
+      <div class="stat"><div class="k">Over</div><div class="v" id="pos">-</div><div class="k" id="posk"></div></div>
       <div class="stat"><div class="k">Altitude</div><div class="v" id="alt">-</div></div>
       <div class="stat"><div class="k">Speed</div><div class="v" id="spd">-</div></div>
       <div class="stat"><div class="k">Sunlight</div><div class="v" id="sun">-</div><div class="k" id="sunnext"></div></div>
@@ -94,20 +127,47 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0 4px}
       <div class="stat fun"><div class="k">One trip around Earth takes</div><div class="v" id="lap">-</div></div>
       <div class="stat fun"><div class="k" id="sunrisesk">Sunrises a day</div><div class="v" id="sunrises">-</div><div class="k">and the same number of sunsets</div></div>
     </div>
-    <p class="muted" style="margin:10px 0 0">The dashed line is where it's been, the solid line is where it's going next. The circle shows everywhere on Earth that can see it right now. The dark part of the map is where it's night, and ☀️ is where the Sun is straight overhead.</p>
+    <p class="muted" style="margin:10px 0 0" id="mapnote">The dashed line is where it's been, the solid line is where it's going next. The circle shows everywhere on Earth that can see it right now. The dark part of the map is where it's night, and ☀️ is where the Sun is straight overhead.</p>
   </section>
 
   <section class="card">
     <h2 id="nexttitle">Next time you can see it</h2>
     <div id="next"><p class="muted">Set your location below to see when it flies over you.</p></div>
+    <div id="sawit"></div>
+    <div class="msg" id="sawmsg"></div>
+    <button class="ghost" id="talk" style="display:none">🔊 Talking countdown: off</button>
     <h2 style="margin-top:22px" id="skytitle">🧭 Sky chart</h2>
     <div id="sky"><p class="muted">The path across your sky shows up here once your location is set.</p></div>
-    <p class="muted" id="skyhelp" style="display:none">Like a compass: the edge of the circle is the horizon, the middle is straight overhead. The <b style="color:var(--accent)">bright line</b> is the part you can see, the dashed part is too dark or too bright to see. Tap any pass in the table to see its path.</p>
+    <p class="muted" id="skyhelp" style="display:none">Like a compass: the edge of the circle is the horizon, the middle is straight overhead. The <b style="color:var(--accent)">bright line</b> is the part you can see, the dashed part is too dark or too bright to see. The Moon and bright planets are shown too. Tap any pass in the table to see its path.</p>
   </section>
 
   <section class="card full">
-    <h2 id="passtitle">Upcoming passes over your home (next 4 days)</h2>
+    <div class="cardhead">
+      <h2 id="passtitle">Upcoming passes over your home (next 4 days)</h2>
+      <a class="btn ghost small" id="calendar" href="/api/calendar.ics?sat=iss" download>📅 Add visible passes to my calendar</a>
+    </div>
     <div id="passes"><p class="muted">Set your location below.</p></div>
+    <p class="muted" style="margin:10px 0 0">⭐ Rating: brighter, higher and longer passes get more stars, and clouds take stars away. Brightness is an estimate.</p>
+  </section>
+
+  <section class="card">
+    <h2>🏅 Spotter log</h2>
+    <div id="spotter"><p class="muted">Loading…</p></div>
+  </section>
+
+  <section class="card">
+    <h2>🌙 Tonight's sky</h2>
+    <div id="tonight"><p class="muted">Set your location below to see tonight's Moon and planets.</p></div>
+  </section>
+
+  <section class="card">
+    <h2 id="falltitle">📉 Watch the ISS fall</h2>
+    <div id="fall"><p class="muted">Loading…</p></div>
+  </section>
+
+  <section class="card">
+    <h2>👩‍🚀 Who's on board</h2>
+    <div id="crew" class="muted">Loading…</div>
   </section>
 
   <section class="card">
@@ -117,8 +177,10 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0 4px}
   </section>
 
   <section class="card">
-    <h2>👩‍🚀 Who's on board</h2>
-    <div id="crew" class="muted">Loading…</div>
+    <h2>📲 Put it on your home screen</h2>
+    <p class="muted"><b style="color:var(--text)">iPhone or iPad:</b> open this page in Safari, tap the <b>Share</b> button, then <b>Add to Home Screen</b>. It opens full screen, like a real app.</p>
+    <p class="muted"><b style="color:var(--text)">Android:</b> in Chrome, tap <b>⋮</b>, then <b>Add to Home screen</b>.</p>
+    <p class="muted">You get a 🛰️ icon on your home screen. It only works on your home Wi-Fi, because that's where your Pi is.</p>
   </section>
 
   <section class="card">
@@ -136,11 +198,13 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0 4px}
     <hr>
     <div class="check"><input type="checkbox" id="alerts"><label for="alerts" style="margin:0">Send phone alerts before a pass</label></div>
     <div class="check"><input type="checkbox" id="visonly"><label for="visonly" style="margin:0">Only alert when I can actually see it (dark sky, spacecraft in sunlight)</label></div>
+    <div class="check"><label for="minstars" style="margin:0">Only alert for passes rated at least</label> <select id="minstars"><option value="1">⭐</option><option value="2">⭐⭐</option><option value="3">⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="5">⭐⭐⭐⭐⭐</option></select></div>
     <label>Send alerts for</label>
     <div class="checks" id="alertsats">
       <label class="check" style="margin:0"><input type="checkbox" value="iss"> ISS</label>
       <label class="check" style="margin:0"><input type="checkbox" value="tiangong"> Tiangong</label>
       <label class="check" style="margin:0"><input type="checkbox" value="hubble"> Hubble</label>
+      <label class="check" style="margin:0"><input type="checkbox" value="starlink"> Starlink trains</label>
     </div>
     <div class="check"><input type="checkbox" id="summary"><label for="summary" style="margin:0">Morning summary of the day's visible passes at</label> <select id="sumhour" aria-label="Morning summary time"></select></div>
     <div class="check"><input type="checkbox" id="weather"><label for="weather" style="margin:0">Check the cloud forecast for each pass</label></div>
@@ -163,21 +227,25 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0 4px}
   </section>
 </main>
 <footer>
-  Orbit data from <a href="https://celestrak.org" target="_blank">CelesTrak</a> · crew list from Open Notify · cloud forecast from <a href="https://open-meteo.com" target="_blank">Open-Meteo</a> · map © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors · live video from NASA.<br>
+  Orbit data from <a href="https://celestrak.org" target="_blank">CelesTrak</a> · crew list from Open Notify · cloud forecast from <a href="https://open-meteo.com" target="_blank">Open-Meteo</a> · map © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors · country borders from <a href="https://www.naturalearthdata.com" target="_blank">Natural Earth</a> · live video from NASA.<br>
   A student project, not affiliated with NASA. <a href="https://github.com/akshajtripathi24-ui/pi-space-station-tracker" target="_blank">Code and guide on GitHub</a>
 </footer>
 <script>
 const $ = id => document.getElementById(id);
 const api = (p, opt) => fetch(p, opt).then(async r => { const j = await r.json(); if (!r.ok) throw new Error(j.error || r.status); return j; });
+const post = (p, body) => api(p, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body || {})});
 const store = {   // remembers your choices in this browser (works without it too)
   get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
   set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 };
 const fmtTime = t => new Date(t * 1000).toLocaleTimeString([], {hour: 'numeric', minute: '2-digit'});
+const fmtDate = t => new Date(t * 1000).toLocaleDateString([], {month: 'short', day: 'numeric'});
 const fmtDay = t => {
-  const d = new Date(t * 1000), today = new Date(), tom = new Date(); tom.setDate(today.getDate() + 1);
+  const d = new Date(t * 1000), today = new Date(), tom = new Date(), yest = new Date();
+  tom.setDate(today.getDate() + 1); yest.setDate(today.getDate() - 1);
   if (d.toDateString() === today.toDateString()) return 'Today';
   if (d.toDateString() === tom.toDateString()) return 'Tomorrow';
+  if (d.toDateString() === yest.toDateString()) return 'Yesterday';
   return d.toLocaleDateString([], {weekday: 'short', month: 'short', day: 'numeric'});
 };
 const fmtLeft = s => {
@@ -187,38 +255,52 @@ const fmtLeft = s => {
   return `${Math.floor(s / 86400)}d ${Math.floor(s % 86400 / 3600)}h`;
 };
 const heightWords = el => el >= 70 ? 'almost straight up' : el >= 40 ? 'high in the sky' : el >= 20 ? 'halfway up' : 'low, near the horizon';
-const where = (lat, lon) => `${Math.abs(lat).toFixed(1)}°${lat >= 0 ? 'N' : 'S'}, ${Math.abs(lon).toFixed(1)}°${lon >= 0 ? 'E' : 'W'}`;
+const coords = (lat, lon) => `${Math.abs(lat).toFixed(1)}°${lat >= 0 ? 'N' : 'S'}, ${Math.abs(lon).toFixed(1)}°${lon >= 0 ? 'E' : 'W'}`;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+const starsHTML = n => n ? `<span class="stars" title="${n} out of 5 stars">${'⭐'.repeat(n)}</span>` : '';
+const COMPASS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
 
 // ---- km or miles
 let units = store.get('units') === 'mi' ? 'mi' : 'km';
 const MI = 0.621371;
 const dist = km => units === 'mi' ? Math.round(km * MI).toLocaleString() + ' mi' : Math.round(km).toLocaleString() + ' km';
+const alt1 = km => (units === 'mi' ? km * MI : km).toFixed(1) + (units === 'mi' ? ' mi' : ' km');
 const speed = kmh => units === 'mi' ? Math.round(kmh * MI).toLocaleString() + ' mph' : Math.round(kmh).toLocaleString() + ' km/h';
 function setUnits(u) {
   units = u; store.set('units', u);
   document.querySelectorAll('#unitpick button').forEach(b => b.classList.toggle('on', b.dataset.u === u));
   if (lastNow) showNow(lastNow);
+  if (fallData) drawFall();
 }
 document.querySelectorAll('#unitpick button').forEach(b => b.onclick = () => setUnits(b.dataset.u));
 
 // ---- which spacecraft
-const ICON = {iss: '🛰️', tiangong: '🛰️', hubble: '🔭'};
-let sat = ['iss', 'tiangong', 'hubble'].includes(store.get('sat')) ? store.get('sat') : 'iss';
-let sats = {iss: {name: 'ISS', has_crew: true}, tiangong: {name: 'Tiangong', has_crew: true}, hubble: {name: 'Hubble', has_crew: false}};
-const satName = () => (sats[sat] || {}).name || sat;
-const theName = () => sat === 'iss' ? 'the ISS' : satName();   // "the ISS", but just "Tiangong" and "Hubble"
+const ICON = {iss: '🛰️', tiangong: '🛰️', hubble: '🔭', starlink: '✨'};
+const SAT_IDS = ['iss', 'tiangong', 'hubble', 'starlink'];
+let sat = SAT_IDS.includes(store.get('sat')) ? store.get('sat') : 'iss';
+let sats = {iss: {name: 'ISS', has_crew: true}, tiangong: {name: 'Tiangong', has_crew: true}, hubble: {name: 'Hubble', has_crew: false}, starlink: {name: 'Starlink', has_crew: false}};
+const satName = (s = sat) => (sats[s] || {}).name || s;
+const theName = (s = sat) => s === 'iss' ? 'the ISS' : s === 'starlink' ? 'the Starlink train' : satName(s);   // "the ISS", but just "Hubble"
+const TheName = (s = sat) => theName(s).replace(/^t/, 'T');
 function pickSat(s) {
   sat = s; store.set('sat', s);
   document.querySelectorAll('#satpick button').forEach(b => b.classList.toggle('on', b.dataset.sat === s));
   $('maptitle').textContent = `Where is ${theName()} right now?`;
   $('nexttitle').textContent = `Next time you can see ${theName()}`;
   $('passtitle').textContent = `Upcoming ${satName()} passes over your home (next 4 days)`;
-  issMarker.setIcon(L.divIcon({className: 'iss-icon', html: ICON[s], iconSize: [30, 30]}));
-  firstFix = true; lastNow = null; passes = []; chosen = null; skyKey = null;
+  $('falltitle').textContent = `📉 Watch ${theName()} fall`;
+  $('calendar').href = '/api/calendar.ics?sat=' + s;
+  issMarker.setIcon(L.divIcon({className: 'iss-icon' + (s === 'starlink' ? ' small' : ''), html: ICON[s], iconSize: s === 'starlink' ? [16, 16] : [30, 30]}));
+  trainLayer.clearLayers();
+  firstFix = true; lastNow = null; passes = []; recent = []; chosen = null; skyKey = null; sawKey = null;
   ['pos', 'alt', 'spd', 'sun', 'today', 'orbits', 'lap', 'sunrises'].forEach(id => $(id).textContent = '-');
+  ['posk', 'orbitsk'].forEach(id => $(id).textContent = '');
   $('passes').innerHTML = '<p class="muted">Working out the passes…</p>';
-  loadNow(); loadTrack(); loadCrew(); loadPasses().then(showNext);
+  $('mapnote').textContent = (s === 'starlink'
+    ? 'The white dots are the satellites of the newest Starlink train, flying in a line. Trains are easiest to see in the first week after launch, before they spread out and climb higher. '
+    : 'The dashed line is where it\'s been, the solid line is where it\'s going next. ') +
+    'The circle shows everywhere on Earth that can see it right now. The dark part of the map is where it\'s night, and ☀️ is where the Sun is straight overhead.';
+  loadNow(); loadTrack(); loadCrew(); loadPasses().then(showNext); loadHistory();
   showVideoCard();
 }
 document.querySelectorAll('#satpick button').forEach(b => b.onclick = () => pickSat(b.dataset.sat));
@@ -229,6 +311,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 7, a
 const night = L.layerGroup().addTo(map);
 const sunMarker = L.marker([0, 0], {icon: L.divIcon({className: 'sun-icon', html: '☀️', iconSize: [22, 22]}), interactive: false}).addTo(map);
 const footprint = L.circle([0, 0], {radius: 2200e3, color: '#22d3ee', weight: 1, fillOpacity: 0.06}).addTo(map);
+const trainLayer = L.layerGroup().addTo(map);
 const issMarker = L.marker([0, 0], {icon: L.divIcon({className: 'iss-icon', html: '🛰️', iconSize: [30, 30]}), zIndexOffset: 1000}).addTo(map);
 let pastLine = L.layerGroup().addTo(map), nextLine = L.layerGroup().addTo(map), homeMarker = null, firstFix = true, nightDrawn = 0;
 
@@ -274,17 +357,23 @@ function showNow(d) {
   issMarker.setLatLng([s.lat, s.lon]);
   footprint.setLatLng([s.lat, s.lon]);
   footprint.setRadius(6371e3 * Math.acos(6371 / (6371 + s.alt_km)));
+  trainLayer.clearLayers();
+  (s.train || []).forEach(([la, lo]) => L.circleMarker([la, lo], {radius: 3, color: '#fff', weight: 1, fillColor: '#e2e8f0', fillOpacity: 1, interactive: false}).addTo(trainLayer));
   if (firstFix) { map.setView([s.lat, s.lon], 2); firstFix = false; }
   if (Date.now() - nightDrawn > 30000) { drawNight(s.subsolar[0], s.subsolar[1]); nightDrawn = Date.now(); }
-  $('pos').textContent = where(s.lat, s.lon);
+  $('pos').textContent = (s.water ? '🌊 ' : '') + s.place;
+  $('posk').textContent = coords(s.lat, s.lon);
   $('alt').textContent = dist(s.alt_km);
   $('spd').textContent = speed(s.speed_kmh);
   $('sun').textContent = s.sunlit ? '☀️ In sunlight' : '🌑 In Earth\'s shadow';
   $('today').textContent = dist(s.km_today);
   $('todayk').textContent = `since midnight: ${(s.km_today / 40075).toFixed(1)} times around Earth`;
-  $('orbits').textContent = 'about ' + (Math.round(s.orbits_since_launch / 100) * 100).toLocaleString();
-  const launched = sats[sat] && sats[sat].launched;
-  $('orbitsk').textContent = launched ? 'launched ' + new Date(launched + 'T12:00:00Z').toLocaleDateString([], {year: 'numeric', month: 'short', day: 'numeric'}) : '';
+  if (s.orbits_since_launch != null) {
+    const n = s.orbits_since_launch;
+    $('orbits').textContent = n < 1000 ? n.toLocaleString() : 'about ' + (Math.round(n / 100) * 100).toLocaleString();
+    $('orbitsk').textContent = s.launched ? (sat === 'starlink' ? 'launched around ' : 'launched ') +
+      new Date(s.launched * 1000).toLocaleDateString([], {year: 'numeric', month: 'short', day: 'numeric'}) : '';
+  }
   $('lap').textContent = Math.round(s.orbit_minutes) + ' min';
   $('sunrises').textContent = Math.round(s.sunrises_per_day);
   $('sunrisesk').textContent = sats[sat] && sats[sat].has_crew ? 'Sunrises the crew sees each day' : 'Sunrises it flies through each day';
@@ -320,8 +409,8 @@ async function loadNow() {
   }
 }
 
-// ---- passes, clouds and the countdown
-let passes = [], chosen = null, hasHome = false;
+// ---- passes, ratings, clouds and the countdown
+let passes = [], recent = [], chosen = null, hasHome = false;
 const cloudHTML = c => c == null ? '<span class="muted">-</span>' :
   c < 30 ? `<span class="cloud clear" title="${c}% cloud cover">☀️ Clear</span>` :
   c < 70 ? `<span class="cloud part" title="${c}% cloud cover">⛅ Partly cloudy</span>` :
@@ -333,7 +422,7 @@ async function loadPasses() {
   let d;
   try { d = await api('/api/passes?sat=' + s0); } catch (e) { return; }
   if (s0 !== sat) return;
-  passes = d.passes;
+  passes = d.passes; recent = d.recent;
   renderPasses();
 }
 function renderPasses() {
@@ -341,13 +430,16 @@ function renderPasses() {
   if (!passes.length) {
     $('passes').innerHTML = sat === 'hubble'
       ? '<p class="muted">Hubble doesn\'t get high enough over your home in the next 4 days. It orbits close to the equator (it never goes farther than 28.5° north or south), so the farther you live from the equator, the lower it stays. Try a lower "Lowest height to count".</p>'
+      : sat === 'starlink' && !(lastNow && lastNow.now) ? '<p class="muted">There\'s no Starlink train to track right now.</p>'
       : `<p class="muted">No passes found in the next 4 days.</p>`;
     return;
   }
-  $('passes').innerHTML = '<div class="tablewrap"><table><tr><th>Day</th><th>Time</th><th>Highest</th><th>Where to look</th><th>Length</th><th>Can you see it?</th><th>Clouds</th><th></th></tr>' +
-    passes.slice(0, 20).map((p, i) => `<tr class="pass${chosen && chosen.start === p.start ? ' sel' : ''}" data-i="${i}"><td>${fmtDay(p.start)}</td><td>${fmtTime(p.visible ? p.vis_start : p.start)}</td><td>${p.max_el}°</td>` +
-      `<td>${p.start_dir} → ${p.end_dir}</td><td>${p.minutes} min</td>` +
-      `<td>${p.visible ? '<span class="tag yes">👀 Yes</span>' : '<span class="tag no">No</span>'}</td>` +
+  const now = Date.now() / 1000;
+  $('passes').innerHTML = '<div class="tablewrap"><table><tr><th>Day</th><th>Time</th><th>Highest</th><th>Where to look</th><th>Length</th><th>Can you see it?</th><th>Rating</th><th>Clouds</th><th></th></tr>' +
+    passes.slice(0, 20).map((p, i) => `<tr class="pass${chosen && chosen.start === p.start ? ' sel' : ''}" data-i="${i}"><td>${fmtDay(p.start)}</td><td>${fmtTime(p.visible ? p.vis_start : p.start)}</td><td>${p.visible ? p.vis_max_el : p.max_el}°</td>` +
+      `<td>${p.visible ? p.vis_start_dir + ' → ' + p.vis_end_dir : p.start_dir + ' → ' + p.end_dir}</td><td>${p.minutes} min</td>` +
+      `<td>${p.start <= now ? '<span class="tag now">Now!</span>' : p.visible ? '<span class="tag yes">👀 Yes</span>' : '<span class="tag no">No</span>'}</td>` +
+      `<td>${p.visible ? starsHTML(p.stars) + `<span class="sub">${esc(p.brightness)}</span>` : '<span class="muted">-</span>'}</td>` +
       `<td>${p.visible ? cloudHTML(p.clouds) : '<span class="muted">-</span>'}</td><td class="muted">🧭 Sky chart</td></tr>`).join('') + '</table></div>';
 }
 $('passes').addEventListener('click', e => {
@@ -364,20 +456,103 @@ function showNext() {
   if (!hasHome) return;
   const now = Date.now() / 1000, next = nextVisible();
   if (chosen && chosen.end < now) chosen = null;
-  drawSky();
-  if (!passes.length) { $('next').innerHTML = '<p class="muted">No passes over your home in the next 4 days.</p>'; return; }
-  if (!next) { $('next').innerHTML = `<p class="muted">No visible passes in the next 4 days. ${esc(theName().replace(/^t/, 'T'))} still flies over, but in daylight or in Earth's shadow. Check back soon!</p>`; return; }
+  drawSky(); renderSawIt(); talkTick();
+  if (!passes.length) { $('next').innerHTML = `<p class="muted">No passes over your home in the next 4 days.</p>`; return; }
+  if (!next) { $('next').innerHTML = `<p class="muted">No visible passes in the next 4 days. ${esc(TheName())} still flies over, but in daylight or in Earth's shadow. Check back soon!</p>`; return; }
   const start = next.vis_start, left = start - now;
   const when = left <= 0 ? '👀 Look up now!' : 'in ' + fmtLeft(left);
   $('next').innerHTML = `<div class="big">${when}</div>
-    <p><b>${fmtDay(start)} at ${fmtTime(start)}</b></p>
-    <p class="muted">Look <b>${next.vis_start_dir}</b>. It climbs to <b>${next.max_el}°</b> (${heightWords(next.max_el)}) and fades out in the <b>${next.vis_end_dir}</b> at ${fmtTime(next.vis_end)}.</p>
+    <p><b>${fmtDay(start)} at ${fmtTime(start)}</b> ${starsHTML(next.stars)}</p>
+    <p class="muted">Look <b>${next.vis_start_dir}</b>. It climbs to <b>${next.vis_max_el}°</b> (${heightWords(next.vis_max_el)}) and fades out in the <b>${next.vis_end_dir}</b> at ${fmtTime(next.vis_end)}.</p>
+    <p class="muted">Brightness: <b>${esc(next.brightness)}</b> (magnitude ${next.mag})</p>
     ${next.clouds != null ? `<p class="muted">Forecast: ${cloudWords(next.clouds)}</p>` : ''}
-    <p class="muted">You'll see a bright, steady dot moving fast across the sky. No blinking lights, so it's not a plane!</p>`;
+    <p class="muted">You'll see a steady dot moving fast across the sky. No blinking lights, so it's not a plane!</p>`;
+}
+
+// ---- "I saw it!" and the spotter log
+let spotter = null, sawKey = null;
+function renderSawIt() {
+  const now = Date.now() / 1000;
+  const r = recent.filter(p => p.vis_start <= now).slice(-1)[0];
+  const logged = r && spotter && spotter.sightings.some(s => s.sat === r.sat && s.start === r.start);
+  const key = r ? r.sat + r.start + (logged ? 'y' : 'n') : '';
+  if (key === sawKey) return;
+  sawKey = key;
+  if (!r) { $('sawit').innerHTML = ''; return; }
+  $('sawit').innerHTML = logged
+    ? `<p class="muted">✅ You logged the ${fmtTime(r.vis_start)} pass. Nice spotting!</p>`
+    : `<div class="sawit"><span>Did you see the <b>${fmtTime(r.vis_start)}</b> pass?</span><button id="sawbtn">👀 I saw it!</button></div>`;
+  if (!logged) $('sawbtn').onclick = () => logSighting(r);
+}
+async function logSighting(p) {
+  const before = new Set((spotter ? spotter.badges : []).filter(b => b.earned).map(b => b.id));
+  try {
+    spotter = await post('/api/sightings', {sat: p.sat, start: p.start});
+    const fresh = spotter.badges.filter(b => b.earned && !before.has(b.id));
+    $('sawmsg').textContent = fresh.length ? '🎉 New badge: ' + fresh.map(b => b.emoji + ' ' + b.name).join(', ') + '!' : '✅ Logged!';
+    if (fresh.length) say('Congratulations! You earned a new badge: ' + fresh.map(b => b.name).join(' and ') + '!');
+    sawKey = null; renderSawIt(); renderSpotter();
+  } catch (e) { $('sawmsg').textContent = '❌ ' + e.message; }
+}
+async function loadSpotter() {
+  try { spotter = await api('/api/sightings'); sawKey = null; renderSpotter(); } catch (e) {}
+}
+function renderSpotter() {
+  const s = spotter;
+  const earned = s.badges.filter(b => b.earned).length;
+  $('spotter').innerHTML = `<div class="spotcount"><div class="big">${s.count}</div><div class="muted">pass${s.count === 1 ? '' : 'es'} spotted · <b style="color:var(--text)">${earned} of ${s.badges.length}</b> badges</div></div>
+    <div class="badges">${s.badges.map(b => `<div class="badge ${b.earned ? 'earned' : 'locked'}" title="${esc(b.how)}"><div class="be">${b.emoji}</div><div class="bn">${esc(b.name)}</div><div class="bh">${b.earned ? '✅ Earned' : esc(b.how) + (b.progress ? ` (${b.progress})` : '')}</div></div>`).join('')}</div>
+    <h3>Your sightings</h3>
+    ${s.sightings.length ? '<ul class="list">' + s.sightings.slice(0, 15).map(x => `<li><span>${fmtDay(x.vis_start)} ${fmtTime(x.vis_start)} · <b>${esc(satName(x.sat))}</b> · up to ${x.max_el}° ${starsHTML(x.stars)}</span><button class="x" data-sat="${x.sat}" data-start="${x.start}" title="Remove this one">✖</button></li>`).join('') + '</ul>'
+      : '<p class="muted">After a pass, tap <b>👀 I saw it!</b> (under the countdown) to log it here and earn badges.</p>'}`;
+}
+$('spotter').addEventListener('click', async e => {
+  const b = e.target.closest('button.x'); if (!b) return;
+  if (!confirm('Remove this sighting from your log?')) return;
+  try { spotter = await post('/api/sightings/remove', {sat: b.dataset.sat, start: +b.dataset.start}); sawKey = null; renderSpotter(); renderSawIt(); } catch (err) {}
+});
+
+// ---- talking countdown (uses the speaker of the phone or computer showing this page)
+const canTalk = 'speechSynthesis' in window;
+let talkOn = canTalk && store.get('talk') === '1';
+const spoken = new Set();
+const DIRW = {N: 'north', NNE: 'north-north-east', NE: 'north-east', ENE: 'east-north-east', E: 'east', ESE: 'east-south-east', SE: 'south-east', SSE: 'south-south-east',
+  S: 'south', SSW: 'south-south-west', SW: 'south-west', WSW: 'west-south-west', W: 'west', WNW: 'west-north-west', NW: 'north-west', NNW: 'north-north-west'};
+function say(text) {
+  if (!canTalk || !talkOn) return;
+  const u = new SpeechSynthesisUtterance(text); u.rate = 0.95;
+  speechSynthesis.speak(u);
+}
+function showTalk() {
+  $('talk').style.display = canTalk ? '' : 'none';
+  $('talk').textContent = talkOn ? '🔊 Talking countdown: on' : '🔈 Talking countdown: off';
+}
+$('talk').onclick = () => {
+  talkOn = !talkOn; store.set('talk', talkOn ? '1' : '0'); showTalk();
+  if (talkOn) say('Talking countdown is on. Keep this page open, and I\'ll tell you when to look up.');
+  else speechSynthesis.cancel();
+};
+function talkTick() {
+  if (!talkOn) return;
+  const now = Date.now() / 1000;
+  const p = passes.find(q => q.visible && q.vis_end + 30 > now);
+  if (!p) return;
+  const dir = DIRW[p.vis_start_dir] || p.vis_start_dir;
+  const events = [
+    [p.vis_start - 300, `Get ready! ${TheName()} will appear in the ${dir} in 5 minutes.`],
+    [p.vis_start - 60, `One minute! Look toward the ${dir}.`],
+    [p.vis_start, `Look up now! ${TheName()} is appearing in the ${dir}.`],
+    [p.vis_end, 'It\'s gone. Did you see it? If you did, tap I saw it to log it.']];
+  if (p.vis_max - p.vis_start > 20 && p.vis_end - p.vis_max > 20)
+    events.push([p.vis_max, `It's at its highest point now, ${p.vis_max_el} degrees up, in the ${DIRW[p.vis_max_dir] || p.vis_max_dir}.`]);
+  for (const [t, text] of events) {
+    const key = p.sat + p.start + '@' + t;
+    if (now >= t && now < t + 20 && !spoken.has(key)) { spoken.add(key); say(text); }
+  }
 }
 
 // ---- sky chart: the path across YOUR sky, like a compass
-let skyKey = null, skyPts = null;
+let skyKey = null, skyPts = null, skyBodies = [];
 async function drawSky() {
   const now = Date.now() / 1000;
   const p = chosen || nextVisible() || passes.find(q => q.end > now);
@@ -385,8 +560,11 @@ async function drawSky() {
   const key = sat + p.start;
   if (key !== skyKey) {
     skyKey = key; skyPts = null;
-    try { skyPts = (await api(`/api/skypath?sat=${sat}&start=${p.start}&end=${p.end}`)).points; } catch (e) { skyKey = null; return; }
-    if (key !== skyKey || !skyPts) return;
+    try {
+      const d = await api(`/api/skypath?sat=${sat}&start=${p.start}&end=${p.end}&at=${p.visible ? p.vis_max : p.max}`);
+      if (key !== skyKey) return;
+      skyPts = d.points; skyBodies = d.bodies;
+    } catch (e) { skyKey = null; return; }
   } else if (!skyPts) {
     return;   // still downloading the path
   } else if (!(now >= p.start && now <= p.end) && $('sky').querySelector('svg')) {
@@ -396,6 +574,7 @@ async function drawSky() {
   $('sky').innerHTML = skySVG(skyPts, p, now);
   $('skyhelp').style.display = '';
 }
+const PLANET_COLOR = {Mercury: '#a8a29e', Venus: '#fef3c7', Mars: '#fb923c', Jupiter: '#fde68a', Saturn: '#eab308'};
 function skySVG(pts, p, now) {
   const C = 140, R = 112;
   const xy = (az, el) => { const r = R * (90 - Math.max(0, el)) / 90, a = az * Math.PI / 180; return [C + r * Math.sin(a), C - r * Math.cos(a)]; };
@@ -408,13 +587,30 @@ function skySVG(pts, p, now) {
     <text class="dir" x="${C}" y="${C - R - 8}" text-anchor="middle">N</text><text class="dir" x="${C + R + 10}" y="${C + 5}" text-anchor="middle">E</text>
     <text class="dir" x="${C}" y="${C + R + 19}" text-anchor="middle">S</text><text class="dir" x="${C - R - 10}" y="${C + 5}" text-anchor="middle">W</text>
     <text x="${C + 3}" y="${C + R * 2 / 3 - 3}">30°</text><text x="${C + 3}" y="${C + R / 3 - 3}">60°</text><text x="${C + 3}" y="${C - 3}">overhead</text>`;
+  // the Moon and bright planets, to help you find your way (and not mix them up!)
+  const boxes = skyBodies.map(b => { const [x, y] = xy(b.az, b.el); return [x - 9, y - 9, x + 9, y + 9]; });   // the marks themselves
+  const hits = (q) => boxes.some(r => q[0] < r[2] && q[2] > r[0] && q[1] < r[3] && q[3] > r[1]);
+  skyBodies.forEach(b => {
+    const [x, y] = xy(b.az, b.el);
+    g += b.name === 'Moon'
+      ? `<text x="${x.toFixed(1)}" y="${(y + 6).toFixed(1)}" text-anchor="middle" style="font-size:16px">🌙</text>`
+      : `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" fill="${PLANET_COLOR[b.name]}" stroke="#0b1222" stroke-width="2"/>`;
+  });
+  skyBodies.forEach(b => {   // put each name where it doesn't cover anything: right, left, below or above
+    const [x, y] = xy(b.az, b.el), w = b.name.length * 6 + 2;
+    const spots = [[x + 11, y + 3, 'start', [x + 10, y - 6, x + 11 + w, y + 5]], [x - 11, y + 3, 'end', [x - 11 - w, y - 6, x - 10, y + 5]],
+                   [x, y + 20, 'middle', [x - w / 2, y + 11, x + w / 2, y + 22]], [x, y - 12, 'middle', [x - w / 2, y - 21, x + w / 2, y - 10]]];
+    const s = spots.find(q => q[3][0] >= 2 && q[3][2] <= 278 && !hits(q[3])) || spots.find(q => q[3][0] >= 2 && q[3][2] <= 278) || spots[0];
+    boxes.push(s[3]);
+    g += `<text class="body" x="${s[0].toFixed(1)}" y="${s[1].toFixed(1)}" text-anchor="${s[2]}">${b.name}</text>`;
+  });
   const segs = []; let cur = null;   // split the path into "can see it" and "can't see it" parts
   pts.forEach(q => {
     const v = !!q[3];
     if (!cur || cur.v !== v) { const last = cur && cur.p[cur.p.length - 1]; cur = {v, p: last ? [last] : []}; segs.push(cur); }
     cur.p.push(xy(q[0], q[1]));
   });
-  segs.forEach((s, i) => g += `<polyline class="${s.v ? 'vis' : 'dim'}" points="${s.p.map(f).join(' ')}"${s.v ? ' marker-end="url(#arrow)"' : ''}/>`);
+  segs.forEach(s => g += `<polyline class="${s.v ? 'vis' : 'dim'}" points="${s.p.map(f).join(' ')}"${s.v ? ' marker-end="url(#arrow)"' : ''}/>`);
   const seen = pts.filter(q => q[3]), top = (seen.length ? seen : pts).reduce((a, b) => b[1] > a[1] ? b : a);   // highest point you can see
   const a = seen.length ? seen[0] : pts[0], z = seen.length ? seen[seen.length - 1] : pts[pts.length - 1];
   const [ax, ay] = xy(a[0], a[1]), [zx, zy] = xy(z[0], z[1]), [tx, ty] = xy(top[0], top[1]);
@@ -434,15 +630,99 @@ function skySVG(pts, p, now) {
     : `<p class="muted" style="text-align:center;margin:6px 0 0"><b style="color:var(--good)">●</b> Rises <b>${fmtTime(a[2])}</b> in the <b>${dir(a)}</b> → highest <b>${Math.round(top[1])}°</b> → sets <b>${fmtTime(z[2])}</b> in the <b>${dir(z)}</b>. Not visible this time.</p>`;
   return g;
 }
-const COMPASS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+
+// ---- tonight's sky: Moon and planets
+async function loadTonight() {
+  let t;
+  try { t = (await api('/api/tonight')).tonight; } catch (e) { return; }
+  if (!t) return;
+  const m = t.moon;
+  let h = `<div class="moon"><div class="e">${m.emoji}</div><div><b>${esc(m.phase)}</b><div class="muted">${m.lit}% lit · ${m.up ? `up now in the <b>${m.dir}</b>, ${m.el}° high` : 'below the horizon right now'}</div>
+    <div class="muted">${m.rise ? 'Rises ' + fmtDay(m.rise).replace('Today', 'today').replace('Tomorrow', 'tomorrow') + ' ' + fmtTime(m.rise) : ''}${m.rise && m.set ? ' · ' : ''}${m.set ? 'Sets ' + fmtDay(m.set).replace('Today', 'today').replace('Tomorrow', 'tomorrow') + ' ' + fmtTime(m.set) : ''}</div></div></div>`;
+  h += t.dark ? `<p class="muted">Dark enough for stars from <b>${fmtTime(t.dark.start)}</b> to <b>${fmtTime(t.dark.end)}</b>.</p>` : '<p class="muted">It doesn\'t get properly dark tonight.</p>';
+  h += t.planets.map(p => `<div class="planet"><span class="dot" style="background:${PLANET_COLOR[p.name]}"></span><div><b>${p.name}</b> ${p.up_now ? '<span class="tag now">Up now</span>' : ''}
+      <div class="muted">${p.from === p.to ? 'Around ' + fmtTime(p.from) + ', only for a short time,' : fmtTime(p.from) + ' to ' + fmtTime(p.to) + ' ·'} starts in the <b>${p.dir}</b>${p.from === p.to ? ', low' : `, highest ${p.top_el}° in the <b>${p.top_dir}</b>`}</div>
+      <div class="muted">${esc(p.bright)}</div></div></div>`).join('');
+  if (t.hidden.length) h += `<p class="muted">Not visible tonight: ${t.hidden.join(', ')} (too close to the Sun).</p>`;
+  h += '<p class="muted">Is that bright dot the ISS or a planet? Planets stay in the same spot for hours. The ISS crosses the whole sky in a few minutes.</p>';
+  $('tonight').innerHTML = h;
+}
+
+// ---- watch it fall: average height from every orbit download
+let fallData = null;
+async function loadHistory() {
+  const s0 = sat;
+  try { const h = await api('/api/history?sat=' + s0); if (s0 !== sat) return; fallData = h; } catch (e) { fallData = null; }
+  drawFall();
+}
+function drawFall() {
+  const box = $('fall');
+  if (sat === 'starlink') { box.innerHTML = '<p class="muted">Not for Starlink: each new train is a different set of satellites, and they climb on purpose with their own engines right after launch.</p>'; return; }
+  const pts = (fallData && fallData.points) || [];
+  if (pts.length < 3) {
+    box.innerHTML = `<p class="muted">Collecting data… Every time the Pi downloads new orbit data (twice a day), it saves ${esc(theName())}'s average height. ` +
+      (pts.length ? `The first one was saved on ${fmtDate(pts[0][0])}. ` : '') +
+      `Check back in a few days. After a few weeks you'll see it slowly falling because of the thin air up there${sat === 'iss' ? ', and jumps when it fires its engines to climb back up (a "reboost")' : ''}.</p>`;
+    return;
+  }
+  const boosts = fallData.reboosts || [];
+  const last = pts[pts.length - 1];
+  let drop = 0, span = 0;   // average fall per day over the last 30 days, leaving out the reboost jumps
+  pts.forEach((p, i) => { const q = pts[i - 1]; if (q && p[0] > last[0] - 30 * 86400 && p[1] - q[1] < 0.4) { drop += q[1] - p[1]; span += p[0] - q[0]; } });
+  const perDay = span > 43200 ? drop / (span / 86400) * 1000 : null;   // meters a day
+  const perDayTxt = perDay == null ? '-' : units === 'mi' ? Math.round(perDay * 3.28084) + ' ft' : Math.round(perDay) + ' m';
+  const W = Math.max(300, box.clientWidth || 600), H = 230, L0 = 52, R0 = 12, T0 = 14, B0 = 28;
+  const t0 = pts[0][0], t1 = last[0], conv = v => units === 'mi' ? v * MI : v;
+  let lo = Math.min(...pts.map(p => p[1])), hi = Math.max(...pts.map(p => p[1]));
+  const pad = Math.max(0.3, (hi - lo) * 0.12); lo -= pad; hi += pad;
+  const X = t => L0 + (t - t0) / Math.max(1, t1 - t0) * (W - L0 - R0), Y = v => T0 + (hi - v) / (hi - lo) * (H - T0 - B0);
+  let g = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Average height over time">`;
+  for (let k = 0; k <= 3; k++) {   // 4 recessive grid lines with height labels
+    const v = lo + (hi - lo) * k / 3, y = Y(v);
+    g += `<line class="gridl" x1="${L0}" x2="${W - R0}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}"/><text class="axis" x="${L0 - 6}" y="${(y + 4).toFixed(1)}" text-anchor="end">${conv(v).toFixed(1)}</text>`;
+  }
+  for (let k = 0; k <= 3; k++) { const t = t0 + (t1 - t0) * k / 3; g += `<text class="axis" x="${X(t).toFixed(1)}" y="${H - 8}" text-anchor="${k === 0 ? 'start' : k === 3 ? 'end' : 'middle'}">${fmtDate(t)}</text>`; }
+  g += `<text class="axis" x="4" y="${T0 - 2}">${units === 'mi' ? 'mi' : 'km'}</text>`;
+  g += `<polyline points="${pts.map(p => X(p[0]).toFixed(1) + ',' + Y(p[1]).toFixed(1)).join(' ')}" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linejoin="round"/>`;
+  boosts.slice(-4).forEach(b => {   // label the last few reboosts
+    const p = pts.find(q => q[0] === b[0]) || pts[pts.length - 1];
+    g += `<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="5" fill="#fbbf24" stroke="#0f172a" stroke-width="2"/>` +
+      `<text class="axis" x="${X(p[0]).toFixed(1)}" y="${(Y(p[1]) - 10).toFixed(1)}" text-anchor="${X(p[0]) > W - 45 ? 'end' : X(p[0]) < L0 + 45 ? 'start' : 'middle'}" style="fill:var(--text)">🚀 +${alt1(b[1]).replace(/ (km|mi)/, '')}</text>`;
+  });
+  g += `<line id="fx" x1="0" x2="0" y1="${T0}" y2="${H - B0}" stroke="#94a3b8" stroke-width="1" style="display:none"/><circle id="fdot" r="5" fill="#22d3ee" stroke="#0f172a" stroke-width="2" style="display:none"/></svg>`;
+  box.innerHTML = `<div class="statrow"><div><div class="v">${alt1(last[1])}</div><div class="k">average height now</div></div>
+      <div><div class="v">▼ ${perDayTxt}</div><div class="k">falling each day (average)</div></div>
+      <div><div class="v">🚀 ${boosts.length}</div><div class="k">reboost${boosts.length === 1 ? '' : 's'} spotted</div></div></div>
+    <div class="chart">${g}<div class="tip" id="ftip"></div></div>
+    <details><summary>Show the numbers</summary><table><tr><th>Date</th><th>Average height</th></tr>${pts.slice(-12).reverse().map(p => `<tr><td>${fmtDate(p[0])} ${fmtTime(p[0])}</td><td>${alt1(p[1])}</td></tr>`).join('')}</table></details>`;
+  const svg = box.querySelector('svg'), tip = $('ftip');
+  svg.addEventListener('pointermove', e => {   // crosshair and tooltip on the nearest point
+    const r = svg.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * W;
+    const p = pts.reduce((a, b) => Math.abs(X(b[0]) - x) < Math.abs(X(a[0]) - x) ? b : a);
+    const px = X(p[0]), py = Y(p[1]);
+    $('fx').setAttribute('x1', px); $('fx').setAttribute('x2', px); $('fx').style.display = '';
+    $('fdot').setAttribute('cx', px); $('fdot').setAttribute('cy', py); $('fdot').style.display = '';
+    tip.innerHTML = `<b>${alt1(p[1])}</b><br>${fmtDate(p[0])} ${fmtTime(p[0])}`; tip.style.display = 'block';
+    const left = px / W * r.width;
+    tip.style.left = Math.min(r.width - tip.offsetWidth, Math.max(0, left - tip.offsetWidth / 2)) + 'px';
+    tip.style.top = Math.max(0, py / H * r.height - tip.offsetHeight - 12) + 'px';
+  });
+  svg.addEventListener('pointerleave', () => { tip.style.display = 'none'; $('fx').style.display = 'none'; $('fdot').style.display = 'none'; });
+}
+let fallW = 0;
+window.addEventListener('resize', () => { const w = $('fall').clientWidth; if (w !== fallW) { fallW = w; if (fallData) drawFall(); } });
 
 // ---- crew
+const NO_CREW = {
+  hubble: 'Nobody! Hubble is a robot telescope. Astronauts last visited it in 2009 on the Space Shuttle to repair and upgrade it.',
+  starlink: 'Nobody! Starlink satellites are robots that beam internet down to Earth.'
+};
 async function loadCrew() {
   const s0 = sat;
   try {
     const {crew} = await api('/api/crew?sat=' + s0);
     if (s0 !== sat) return;
-    if (crew === null) $('crew').innerHTML = 'Nobody! Hubble is a robot telescope. Astronauts last visited it in 2009 on the Space Shuttle to repair and upgrade it.';
+    if (crew === null) $('crew').innerHTML = NO_CREW[sat] || 'Nobody on board.';
     else $('crew').innerHTML = crew.length ? `<b style="color:var(--text)">${crew.length} people</b> are living on ${esc(theName())} right now:<br>` + crew.map(esc).join(', ') : 'Crew list unavailable right now.';
   } catch (e) { $('crew').textContent = 'Crew list unavailable right now.'; }
 }
@@ -465,7 +745,8 @@ let videoUrl = '', videoFor = null;
 const NO_VIDEO = {
   tiangong: {icon: '🛰️', text: 'Tiangong doesn\'t have a live video you can watch any time. China\'s space agency only streams from it during special events, like launches, spacewalks and science classes from space.'},
   hubble: {icon: '🔭', text: 'Hubble doesn\'t have a live video camera. Its cameras point at stars and galaxies far away, not at Earth, and take long-exposure photos instead of video.',
-           note: '<a href="https://esahubble.org/images/" target="_blank" rel="noopener">See Hubble\'s latest pictures</a>'}
+           note: '<a href="https://esahubble.org/images/" target="_blank" rel="noopener">See Hubble\'s latest pictures</a>'},
+  starlink: {icon: '✨', text: 'Starlink satellites don\'t stream video. They\'re internet satellites: they beam internet down to dishes on the ground.'}
 };
 function showVideoCard() {
   if (videoFor === sat) return;          // don't stop a video that's already playing
@@ -505,6 +786,7 @@ async function loadSettings() {
   $('place').value = c.place || ''; $('lat').value = c.lat ?? ''; $('lon').value = c.lon ?? '';
   $('minel').value = c.min_elevation; $('mins').value = c.alert_minutes;
   $('alerts').checked = c.alerts_on; $('visonly').checked = c.visible_only; $('topic').textContent = c.ntfy_topic;
+  $('minstars').value = c.min_stars;
   document.querySelectorAll('#alertsats input').forEach(b => b.checked = c.alert_sats.includes(b.value));
   $('summary').checked = c.summary_on; $('sumhour').value = c.summary_hour; $('weather').checked = c.weather_on;
   $('videourl').value = c.video_url || ''; videoUrl = c.video_url || '';
@@ -515,39 +797,41 @@ $('save').onclick = async () => {
   const v = $('videourl').value.trim();
   if (v && !embedUrl(v)) { $('savemsg').textContent = '❌ The video link must start with https://'; return; }
   try {
-    const c = await api('/api/settings', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
+    const c = await post('/api/settings', {
       place: $('place').value, lat: $('lat').value, lon: $('lon').value, min_elevation: $('minel').value,
-      alert_minutes: $('mins').value, alerts_on: $('alerts').checked, visible_only: $('visonly').checked,
+      alert_minutes: $('mins').value, alerts_on: $('alerts').checked, visible_only: $('visonly').checked, min_stars: $('minstars').value,
       alert_sats: [...document.querySelectorAll('#alertsats input:checked')].map(b => b.value),
-      summary_on: $('summary').checked, summary_hour: $('sumhour').value, weather_on: $('weather').checked, video_url: v})});
+      summary_on: $('summary').checked, summary_hour: $('sumhour').value, weather_on: $('weather').checked, video_url: v});
     hasHome = c.lat != null && c.lon != null; videoUrl = c.video_url || '';
     $('savemsg').textContent = '✅ Saved! Working out your passes…';
     skyKey = null; chosen = null;
-    await loadPasses(); showNext(); loadNow();
+    await loadPasses(); showNext(); loadNow(); loadTonight();
     $('savemsg').textContent = '✅ Saved!';
   } catch (e) { $('savemsg').textContent = '❌ ' + e.message; }
 };
-async function testSend(path, btn) {
+async function testSend(path) {
   $('testmsg').textContent = 'Sending…';
-  try { await api(path, {method: 'POST'}); $('testmsg').textContent = '✅ Sent! Check your phone.'; }
+  try { await post(path); $('testmsg').textContent = '✅ Sent! Check your phone.'; }
   catch (e) { $('testmsg').textContent = '❌ ' + e.message; }
 }
 $('test').onclick = () => testSend('/api/test-alert');
 $('testsum').onclick = () => testSend('/api/test-summary');
 $('newtopic').onclick = async () => {
   if (!confirm('Make a new topic? You will need to subscribe to the new one in the ntfy app.')) return;
-  const c = await api('/api/new-topic', {method: 'POST'}); $('topic').textContent = c.ntfy_topic;
+  const c = await post('/api/new-topic'); $('topic').textContent = c.ntfy_topic;
 };
 $('copy').onclick = () => { navigator.clipboard && navigator.clipboard.writeText($('topic').textContent); $('copy').textContent = 'Copied!'; setTimeout(() => $('copy').textContent = 'Copy', 1500); };
 
 // ---- start
-setUnits(units);
+setUnits(units); showTalk();
 api('/api/sats').then(s => { sats = s; pickSat(sat); }).catch(() => pickSat(sat));
-loadSettings().then(() => loadPasses().then(showNext)).catch(() => {});
+loadSettings().then(() => { loadPasses().then(showNext); loadTonight(); }).catch(() => {});
+loadSpotter();
 setInterval(loadNow, 2000);
 setInterval(() => { showNext(); showSunCountdown(); }, 1000);
 setInterval(loadTrack, 60000);
 setInterval(() => loadPasses().then(showNext), 120000);
+setInterval(loadTonight, 600000);
 </script>
 </body>
 </html>

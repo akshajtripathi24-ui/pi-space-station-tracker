@@ -43,6 +43,29 @@ Once an hour, the Pi asks [Open-Meteo](https://open-meteo.com) (free, no account
 ## 10. Morning summary
 Every 20 seconds, the alert check also looks at the clock. In the first 3 hours after your summary time, if it hasn't sent one today, it lists the visible passes for the next 24 hours, sends them, and writes today's date in `data/state.json` so it only happens once a day.
 
+## 11. How bright will it be?
+The brightness is worked out for every 5 seconds of the part of the pass you can see, and the brightest moment is shown. Three things matter:
+1. **Size:** each spacecraft has a "standard brightness" (how bright it would look 1,000 km away, half lit). The ISS is the biggest, so it's the brightest.
+2. **Distance:** twice as far away looks 4 times dimmer.
+3. **Which side you see:** if the Sun is behind you, you see the fully lit side, like a full Moon. If the Sun is behind it, you see mostly the dark side.
+
+Low passes are also dimmed a little, because you're looking through more air.
+
+## 12. Star ratings
+Each visible pass starts with 1 star, then gets up to 2 more for brightness, up to 1.5 for height and up to 0.5 for how long you can see it. Clouds take away 1 star (partly cloudy) or 2 (cloudy). The result is rounded to 1–5 stars.
+
+## 13. Country and ocean names
+`places.py` checks which country's border outline the point is inside, using a trick called *ray casting*: imagine a line going east from the point and count how many times it crosses the border. An odd number means it's inside. If it's not in any country, simple latitude and longitude boxes decide which ocean or sea it's over.
+
+## 14. The Moon and planets
+`sky.py` works out where the planets are from their orbits around the Sun (NASA JPL's "approximate positions" formulas), then where they are as seen from Earth. The Moon uses a shorter formula from the *Astronomical Almanac*. The Moon's phase comes from the angle between the Sun and the Moon.
+
+## 15. Starlink trains
+The Pi downloads everything launched in the last 30 days from CelesTrak, keeps only the satellites named STARLINK, and groups them by launch. The newest launch is the train. Passes are worked out for the satellite in the middle of the train.
+
+## 16. Watching it fall
+Each orbit download includes the lowest and highest points of the orbit. Halfway between is the *average height*, which is saved in `data/history.json`. When the height jumps up by more than 400 meters, that's counted as a reboost.
+
 ## How accurate is it?
 We compared it with [Skyfield](https://rhodesmill.org/skyfield/), a professional astronomy library, over 2 days of passes (and again for Tiangong and Hubble in version 1.1):
 
@@ -54,5 +77,8 @@ We compared it with [Skyfield](https://rhodesmill.org/skyfield/), a professional
 | In sunlight or in shadow | matched every time |
 | Crew's next sunrise or sunset | within 15 seconds |
 | Where the Sun is overhead (☀️) | under 0.01° |
+| Planets' positions (2014–2034) | under 0.1° |
+| The Moon's position | under 0.8° (about 1.5 Moon widths) |
+| The Moon's "% lit" | within 1% |
 
 That's far more accurate than you need to spot it with your eyes.

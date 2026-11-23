@@ -30,7 +30,8 @@ The 🏠 appears on the map and the **Upcoming passes** table fills in.
 | **Alert me this many minutes before** | When the phone alert arrives | 10 minutes |
 | **Send phone alerts before a pass** | Turns alerts on or off | On |
 | **Only alert when I can actually see it** | Skips passes in daylight or when the spacecraft is in Earth's shadow | On |
-| **Send alerts for** | Which spacecraft send alerts: ISS, Tiangong and/or Hubble | ISS only |
+| **Only alert for passes rated at least** | Skip passes with fewer stars than this. Pick ⭐⭐⭐ to only hear about good ones | ⭐ (every visible pass) |
+| **Send alerts for** | Which spacecraft send alerts: ISS, Tiangong, Hubble and/or Starlink trains | ISS only |
 | **Morning summary** | One message each morning listing the day's visible passes, at the time you pick | On, 8:00 AM |
 | **Check the cloud forecast** | Shows the forecast clouds for each visible pass, and adds it to alerts | On |
 | **ISS live video link** | Leave empty for NASA's live video, or paste a YouTube link to a different live video of the ISS | Empty |
@@ -40,7 +41,7 @@ Press **Save** after changing any of them.
 ## The switches at the top of the page
 | Switch | What it does |
 |---|---|
-| **🛰️ ISS · 🛰️ Tiangong · 🔭 Hubble** | Which spacecraft the map, stats, passes and sky chart show |
+| **🛰️ ISS · 🛰️ Tiangong · 🔭 Hubble · ✨ Starlink** | Which spacecraft the map, stats, passes and sky chart show |
 | **km · miles** | Shows distances and speeds in kilometers or miles |
 
 These are remembered by each phone or computer you use, so your phone can show miles while your laptop shows km. They don't change your alerts.

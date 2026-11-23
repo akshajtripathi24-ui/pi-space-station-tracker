@@ -90,3 +90,43 @@ Problems from installing, updating and running it on a real Raspberry Pi 4.
 **Problem:** The live video stayed the same when switching to Tiangong or Hubble. That made it look like a video from Tiangong or Hubble, but it was really the ISS.
 **Cause:** Only the ISS has a live video you can watch any time. Tiangong only streams during special events (launches, spacewalks, science classes), and Hubble has no video camera at all. Its cameras point at stars and galaxies.
 **Fix:** The live video now only plays when **ISS** is selected. For Tiangong and Hubble, the card says why there's no live video and has a **Watch the ISS live instead** button. Switching away from the ISS also stops the video. A test checked all of this: the ISS video starts, clicking ISS again doesn't restart it, Tiangong and Hubble show their messages, and the button switches back to the ISS and starts the video.
+
+## Part 4: Adding 10 more features (version 1.2)
+Version 1.2 added pass ratings, brightness, country and ocean names, the talking countdown, the spotter log and badges, the Moon and planets, calendar files, Starlink trains, the home screen app and the "watch it fall" chart. Everything was tested with a fake clock: the page was run through a whole pass, and the talking countdown spoke at exactly the right seconds (5 minutes before, 1 minute before, when it appears, at the highest point and when it's gone). The Moon and planet positions were checked against Skyfield for every month from 2014 to 2034.
+
+### 20. "Over: Russia" when the ISS was over Iceland
+**Problem:** In testing, a point over Iceland was labeled *Russia*.
+**Cause:** Russia crosses the 180° longitude line, where the map jumps from +180° to −180°. Its border outline jumped across the whole world, so the "is it inside?" test thought Russia covered half the planet. Fiji had the same problem.
+**Fix:** For Russia and Fiji, the western longitudes are shifted by +360°, so each outline stays in one piece. Over 30 test places were checked, including Iceland, both ends of Russia and Fiji.
+
+### 21. "Venus: Super bright, like Venus"
+**Problem:** The brightness words were written for spacecraft. For the planet Venus itself, the tonight's sky card said Venus was "like Venus".
+**Fix:** For Venus it now says "Super bright, the brightest planet".
+
+### 22. Mercury "5:16 PM to 5:16 PM"
+**Problem:** Mercury was only above the trees for a few minutes after dark, so the start and end times were the same.
+**Fix:** In that case it says "Around 5:16 PM, only for a short time".
+
+### 23. Names on the sky chart covered each other
+**Problem:** When the Moon and Mars were close together, the 🌙 covered the word "Moon", and "Venus" got cut off at the edge of the chart.
+**Fix:** Each name now tries four spots (right, left, below, above) and takes the first one that doesn't cover another mark or go off the edge.
+
+### 24. "Falling each day: -"
+**Problem:** The chart worked out how fast the ISS falls since the last reboost. Right after a reboost there was only one point, so it showed "-".
+**Fix:** It now averages the fall over the last 30 days and leaves out the reboost jumps.
+
+### 25. The Starlink train was hidden under its own icon
+**Problem:** Right after launch, the satellites in a train are close together, so the big ✨ covered all the dots.
+**Fix:** For Starlink the ✨ is smaller, so you can see the line of white dots (zoom in to see them better).
+
+### 26. Logging a pass before it happened gave a confusing message
+**Problem:** Trying to log a pass that hadn't started said "That pass isn't in the list any more", which didn't make sense.
+**Fix:** It now says "You can log it once it has started. Good luck!" A test also checked that you can't log the same pass twice, or a pass from more than 6 hours ago.
+
+### 27. Phones only fully install apps from `https://` websites
+**Problem:** To install a website as a real app, Android needs the site to use `https://` (a secure connection). The Pi uses `http://`, because secure connections need a certificate, which is hard to set up for a home network.
+**Fix:** The page still has an app icon and settings, so on iPhone, **Add to Home Screen** opens it full screen like a real app. On Android, **Add to Home screen** gives you the 🛰️ icon, but it opens in Chrome. The guide explains both.
+
+### 28. "Address already in use" while testing
+**Problem:** While testing, a new copy of the tracker wouldn't start: `OSError: [Errno 98] Address already in use`. An old test copy was still running in the background and using port 8080. The command meant to stop it was looking for the wrong name, so it never stopped it.
+**Fix:** Stopped the old copy, then started the new one. On the Pi, `sudo systemctl restart isstracker` avoids this, because it always stops the old copy first. (It's in [Troubleshooting](07-troubleshooting.md) too.)

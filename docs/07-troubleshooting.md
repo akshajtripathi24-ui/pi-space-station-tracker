@@ -34,6 +34,12 @@ sudo systemctl restart isstracker       # restarts the tracker
 | The live video says "unavailable" or is black | NASA isn't streaming right now, or the station is on the night side of Earth (every 45 minutes). Try later, or paste a different live video link in the settings. |
 | No live video for Tiangong or Hubble | Normal. Only the ISS has a live video you can watch any time. Press **Watch the ISS live instead**. |
 | The numbers changed to miles (or km) | Tap **km** or **miles** at the top of the page. Each device remembers its own choice. |
+| Starlink says there's no train | No Starlink launches in the last 30 days, or the Pi couldn't download the list. Try again after the next SpaceX launch. |
+| The talking countdown is silent | Keep the page open and the screen on. Check the volume, and on iPhone turn off silent mode. Tap the button off and on again: you should hear "Talking countdown is on". |
+| No **👀 I saw it!** button | It only appears for **visible** passes of the spacecraft you're looking at, from when the pass starts until 6 hours after it ends. |
+| "Watch the ISS fall" says collecting data | Normal for the first few days. It saves one point each time new orbit data is downloaded (twice a day). |
+| The calendar file doesn't open | On iPhone, use Safari. On a computer, double-click the downloaded `.ics` file, or import it in your calendar app. |
+| On Android, the home screen icon opens Chrome | Normal. Android only installs full-screen apps from `https://` websites, and the Pi uses `http://`. |
 
 ## Times and alerts
 | Problem | Fix |

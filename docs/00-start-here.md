@@ -65,11 +65,12 @@ bash setup-autostart.sh
 ✅ You're done when you've seen a bright dot glide across the sky. 🎉
 
 **Step 11. Try the extras (optional).**
-- Tap **Tiangong** or **Hubble** at the top to track China's space station or the Hubble telescope.
+- Tap **Tiangong**, **Hubble** or **Starlink** at the top to track China's space station, the Hubble telescope or the newest Starlink train.
 - Tap **miles** if you prefer miles to kilometers.
 - Tap any pass in the table to see its **🧭 sky chart**.
 - With **ISS** selected, press **▶ Start NASA's live video** to watch Earth from space.
 - Tick **Morning summary** in the settings to get the day's passes each morning.
+- Turn on the **🔊 Talking countdown**, log passes with **👀 I saw it!** and collect badges, and add the page to your phone's home screen. See [9. Extras](09-extras.md).
 
 ✅ You're done when you've found your favorite. 🛰️
 
