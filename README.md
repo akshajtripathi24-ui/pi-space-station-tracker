@@ -1,17 +1,25 @@
 # 🛰️ Pi Space Station Tracker
 
-A web app that runs on a Raspberry Pi and tracks the **International Space Station (ISS)** live. It shows where the ISS is right now on a world map, predicts when it will fly over **your town**, and sends an **alert to your phone** a few minutes before a pass you can actually see, so you can go outside and watch it.
+A web app that runs on a Raspberry Pi and tracks the **International Space Station (ISS)** live, plus China's **Tiangong** space station and the **Hubble Space Telescope**. It shows where they are right now on a world map, predicts when they'll fly over **your town**, checks the cloud forecast, and sends an **alert to your phone** a few minutes before a pass you can actually see, so you can go outside and watch it.
 
 You only need the Pi. No sensors, wires or add-on boards. Open it on any phone, tablet or computer on your home Wi-Fi.
 
 ## Features
 
 - **🌍 Live map:** the ISS moving across the world, where it's been (dashed line), where it's going next (solid line), and a circle showing everywhere on Earth that can see it right now.
+- **🌗 Day and night on the map:** the night side of Earth is shaded, and ☀️ marks where the Sun is straight overhead.
+- **🛰️ Three spacecraft:** switch between the **ISS**, **Tiangong** and **Hubble** with the buttons at the top.
+- **📏 Kilometers or miles:** one tap at the top of the page switches every distance and speed.
 - **📊 Live stats:** what it's over, its altitude (about 420 km), its speed (about 27,600 km/h), whether it's in sunlight or in Earth's shadow, and where it is from your home.
-- **🔭 Pass predictions:** every time the ISS passes over you in the next 4 days, with the time, which direction to look, how high it gets, and whether you can actually **see** it.
+- **🤩 Fun stats:** how far it has traveled today, how many trips around Earth since launch, how long one trip takes, and a countdown to the crew's next sunrise or sunset (they get about 16 a day).
+- **🔭 Pass predictions:** every time it passes over you in the next 4 days, with the time, which direction to look, how high it gets, and whether you can actually **see** it.
+- **🧭 Sky chart:** a compass-style picture of the pass's path across your sky. Tap any pass to see its chart.
+- **☁️ Cloud check:** the cloud forecast for each pass you could see, so you know if it's worth going outside.
 - **⏱️ Countdown** to the next pass you can see, with plain-English directions ("Look NW. It climbs halfway up and fades out in the E").
 - **📱 Phone alerts:** a notification a few minutes before a visible pass, using the free ntfy app. No account needed.
-- **👩‍🚀 Who's on board:** the names of the astronauts on the ISS right now.
+- **🌅 Morning summary:** one message each morning listing the day's visible passes.
+- **📺 Live view from space:** NASA's live video, right on the page.
+- **👩‍🚀 Who's on board:** the names of the astronauts on the ISS and Tiangong right now.
 - **Runs by itself:** starts when the Pi boots, restarts if it crashes, updates its orbit data twice a day, and updates with one command.
 - **Private:** your location stays on your Pi. It's never uploaded anywhere.
 
@@ -51,13 +59,15 @@ Then open **http://raspberrypi.local:8080** (or `http://YOUR-PI-IP:8080`) in a b
 
 **Update later:** `cd ~/isstracker && git pull && sudo systemctl restart isstracker`
 
+**Version 1.1** added Tiangong and Hubble, km/miles, day/night shading, the sky chart, the cloud check, the morning summary, fun stats and NASA's live video. If you installed version 1.0, the update command above is all you need. Your settings are kept.
+
 It uses port **8080**, so it can run on the same Pi as the [Pi Stock Tracker](https://github.com/akshajtripathi24-ui/pi-stock-tracker) (port 8000).
 
 ## Good to know
 
 - **Keep it on your home network.** Don't forward ports on your router or put it on the public internet. It has no password, and it knows your location.
 - **Use your town's location, not your exact address.** Two decimal places (about 1 km) gives exactly the same pass times.
-- Data comes from free services: orbit data from [CelesTrak](https://celestrak.org), the crew list from [Open Notify](http://open-notify.org), and map tiles from [OpenStreetMap](https://www.openstreetmap.org/copyright). Please don't change the code to download from them more often.
+- Data comes from free services: orbit data from [CelesTrak](https://celestrak.org), the crew list from [Open Notify](http://open-notify.org), the cloud forecast from [Open-Meteo](https://open-meteo.com), map tiles from [OpenStreetMap](https://www.openstreetmap.org/copyright), and the live video from NASA on YouTube. Please don't change the code to download from them more often.
 - This is a student learning project and isn't affiliated with NASA.
 
 ## Files
@@ -69,7 +79,7 @@ It uses port **8080**, so it can run on the same Pi as the [Pi Stock Tracker](ht
 | `static/leaflet/` | The map library ([Leaflet](https://leafletjs.com), BSD-2 license), included so the page works even if the library's website is down |
 | `setup-autostart.sh` | Makes the tracker start by itself when the Pi boots |
 | `requirements.txt` | The one Python package it needs: `sgp4` |
-| `config.json`, `data/` | Created on your Pi: your settings and saved orbit data. Never uploaded to GitHub |
+| `config.json`, `data/` | Created on your Pi: your settings, saved orbit data (`data/tle_iss.txt`, `tle_tiangong.txt`, `tle_hubble.txt`) and which alerts were already sent. Never uploaded to GitHub |
 
 ## License
 

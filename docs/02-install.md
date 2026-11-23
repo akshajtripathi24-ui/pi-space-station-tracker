@@ -27,7 +27,7 @@ What each line does:
 ## Open it
 On any device on your Wi-Fi, open **http://raspberrypi.local:8080**. If that doesn't work, run `hostname -I` on the Pi and open `http://THAT-IP:8080`.
 
-The first time it starts, it downloads the latest ISS orbit data, which takes a few seconds. Then set your location: [3. Set your location](03-set-your-location.md).
+The first time it starts, it downloads the latest orbit data for the ISS, Tiangong and Hubble, which takes a few seconds. Then set your location: [3. Set your location](03-set-your-location.md).
 
 ## Useful commands
 ```bash

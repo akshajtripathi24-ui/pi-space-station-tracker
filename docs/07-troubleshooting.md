@@ -26,6 +26,11 @@ sudo systemctl restart isstracker       # restarts the tracker
 | An error says `orbit calculation error` | The saved orbit data is too old. Make sure the Pi has internet, then restart the tracker. |
 | **Upcoming passes** stays empty | Set your location and press **Save**. |
 | "Who's on board" says unavailable | The free crew-list service is sometimes down. It tries again every 6 hours. Nothing else is affected. |
+| `no orbit data yet for Tiangong` (or Hubble) | Right after updating to version 1.1, it hasn't downloaded their orbit data yet. Wait a minute, or restart the tracker. Check the Pi's internet if it stays. |
+| Hubble's passes table is empty | Normal if you live far from the equator. Hubble's path never goes farther than 28.5° north or south, so it may never get above your **Lowest height to count**. Try setting it to 5°. |
+| The **Clouds** column shows **-** | The forecast only covers the next 5 days, only visible passes get one, and it's hidden when **Check the cloud forecast** is off. If it's always **-**, the Pi can't reach Open-Meteo: `ping -c 3 api.open-meteo.com` |
+| The live video says "unavailable" or is black | NASA isn't streaming right now, or the station is on the night side of Earth (every 45 minutes). Try later, or paste a different live video link in the settings. |
+| The numbers changed to miles (or km) | Tap **km** or **miles** at the top of the page. Each device remembers its own choice. |
 
 ## Times and alerts
 | Problem | Fix |

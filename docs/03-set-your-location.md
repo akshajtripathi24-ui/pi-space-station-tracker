@@ -28,7 +28,21 @@ The 🏠 appears on the map and the **Upcoming passes** table fills in.
 |---|---|---|
 | **Lowest height to count** | Passes lower than this (in degrees above the horizon) are ignored, because trees and houses block them | 10° |
 | **Alert me this many minutes before** | When the phone alert arrives | 10 minutes |
-| **Send phone alerts** | Turns alerts on or off | On |
-| **Only alert when I can actually see it** | Skips passes in daylight or when the ISS is in Earth's shadow | On |
+| **Send phone alerts before a pass** | Turns alerts on or off | On |
+| **Only alert when I can actually see it** | Skips passes in daylight or when the spacecraft is in Earth's shadow | On |
+| **Send alerts for** | Which spacecraft send alerts: ISS, Tiangong and/or Hubble | ISS only |
+| **Morning summary** | One message each morning listing the day's visible passes, at the time you pick | On, 8:00 AM |
+| **Check the cloud forecast** | Shows the forecast clouds for each visible pass, and adds it to alerts | On |
+| **Live video link** | Leave empty for NASA's live video, or paste a YouTube link to a different live video | Empty |
+
+Press **Save** after changing any of them.
+
+## The switches at the top of the page
+| Switch | What it does |
+|---|---|
+| **🛰️ ISS · 🛰️ Tiangong · 🔭 Hubble** | Which spacecraft the map, stats, passes and sky chart show |
+| **km · miles** | Shows distances and speeds in kilometers or miles |
+
+These are remembered by each phone or computer you use, so your phone can show miles while your laptop shows km. They don't change your alerts.
 
 **Next:** [4. Phone alerts](04-phone-alerts.md)

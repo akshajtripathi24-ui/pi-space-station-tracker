@@ -15,69 +15,118 @@ header{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:
 header h1{font-size:20px;margin:0;font-weight:800}
 .pill{font-size:12px;padding:4px 10px;border-radius:999px;background:#0b2530;color:var(--accent);border:1px solid #155e75}
 .pill.warn{background:#2a1f05;color:var(--warn);border-color:#854d0e}
+.controls{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid #155e75;border-radius:10px;overflow:hidden}
+.seg button{margin:0;border-radius:0;background:transparent;color:var(--accent);padding:7px 12px;font-size:13px}
+.seg button.on{background:var(--accent);color:#04131a}
 main{max-width:1200px;margin:0 auto;padding:16px;display:grid;gap:16px;grid-template-columns:2fr 1fr}
-@media(max-width:900px){main{grid-template-columns:1fr}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+@media(max-width:900px){main{grid-template-columns:1fr}.controls{margin-left:0}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
 .card h2{font-size:15px;margin:0 0 12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
 #map{height:440px;border-radius:10px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:12px}
 .stat{background:#0b1222;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
 .stat .k{font-size:12px;color:var(--muted)}.stat .v{font-size:20px;font-weight:800;margin-top:2px}
+.stat.fun{background:#0d1530;border-color:#1e2a52}
 .big{font-size:34px;font-weight:900;color:var(--accent);margin:4px 0}
 .muted{color:var(--muted);font-size:14px}
+.tablewrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:14px}
-th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-weight:600}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--muted);font-weight:600}
+tr.pass{cursor:pointer}tr.pass:hover{background:#111c33}tr.pass.sel{background:#0b2530}
 .tag{font-size:12px;padding:2px 8px;border-radius:999px;font-weight:700}
 .tag.yes{background:#052e16;color:var(--good)}.tag.no{background:#1f2937;color:var(--muted)}
+.cloud{font-size:13px}.cloud.clear{color:var(--good)}.cloud.part{color:var(--warn)}.cloud.cloudy{color:var(--bad)}
 label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
-input[type=text],input[type=number]{width:100%;padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:#0b1222;color:var(--text);font-size:15px}
+input[type=text],input[type=number],select{width:100%;padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:#0b1222;color:var(--text);font-size:15px}
 .row{display:flex;gap:10px}.row>div{flex:1}
 .check{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:14px}
+.check select{width:auto;padding:4px 6px;font-size:14px}
+.checks{display:flex;gap:16px;flex-wrap:wrap}
 button{background:var(--accent);color:#04131a;border:0;border-radius:8px;padding:9px 14px;font-weight:800;cursor:pointer;font-size:14px;margin-top:12px}
 button.ghost{background:transparent;color:var(--accent);border:1px solid #155e75}
 code{background:#0b1222;border:1px solid var(--line);padding:3px 7px;border-radius:6px;font-size:14px;word-break:break-all}
 .iss-icon{font-size:30px;line-height:30px;text-align:center;filter:drop-shadow(0 0 6px #22d3ee)}
 .home-icon{font-size:22px;line-height:22px;text-align:center}
+.sun-icon{font-size:22px;line-height:22px;text-align:center;filter:drop-shadow(0 0 8px #fbbf24)}
+.sky{width:100%;max-width:300px;display:block;margin:6px auto 0}
+.sky .ring{fill:#0b1222;stroke:#334155;stroke-width:1.5}.sky .grid{fill:none;stroke:#1e293b;stroke-width:1}
+.sky .vis{fill:none;stroke:var(--accent);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.sky .dim{fill:none;stroke:#64748b;stroke-width:2;stroke-dasharray:4 5}
+.sky text{fill:var(--muted);font-size:11px;font-family:inherit}.sky .dir{fill:var(--text);font-weight:800;font-size:13px}
+.sky .lbl{fill:var(--text);font-size:11px;font-weight:700;paint-order:stroke;stroke:#0b1222;stroke-width:4px;stroke-linejoin:round}
+.video{position:relative;aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:10px}
+.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
-footer a{color:var(--muted)}
+footer a,.muted a{color:var(--accent)}
 .msg{font-size:13px;margin-top:8px;min-height:18px}
 .full{grid-column:1/-1}
+hr{border:0;border-top:1px solid var(--line);margin:16px 0 4px}
 </style>
 </head>
 <body>
 <header>
   <h1>🛰️ Pi Space Station Tracker</h1>
   <span class="pill" id="status">Connecting…</span>
+  <div class="controls">
+    <div class="seg" id="satpick" title="Which spacecraft to track">
+      <button data-sat="iss" class="on">🛰️ ISS</button><button data-sat="tiangong">🛰️ Tiangong</button><button data-sat="hubble">🔭 Hubble</button>
+    </div>
+    <div class="seg" id="unitpick" title="Kilometers or miles">
+      <button data-u="km" class="on">km</button><button data-u="mi">miles</button>
+    </div>
+  </div>
 </header>
 <main>
   <section class="card">
-    <h2>Where is the ISS right now?</h2>
+    <h2 id="maptitle">Where is the ISS right now?</h2>
     <div id="map"></div>
     <div class="stats">
       <div class="stat"><div class="k">Over</div><div class="v" id="pos">-</div></div>
       <div class="stat"><div class="k">Altitude</div><div class="v" id="alt">-</div></div>
       <div class="stat"><div class="k">Speed</div><div class="v" id="spd">-</div></div>
-      <div class="stat"><div class="k">Sunlight</div><div class="v" id="sun">-</div></div>
+      <div class="stat"><div class="k">Sunlight</div><div class="v" id="sun">-</div><div class="k" id="sunnext"></div></div>
       <div class="stat"><div class="k">From your home</div><div class="v" id="home">Set your location</div><div class="k" id="homekm"></div></div>
     </div>
-    <p class="muted" style="margin:10px 0 0">The dashed line is where it's been, the solid line is where it's going next. The circle shows everywhere on Earth that can see it right now.</p>
+    <div class="stats">
+      <div class="stat fun"><div class="k">Distance traveled today</div><div class="v" id="today">-</div><div class="k" id="todayk"></div></div>
+      <div class="stat fun"><div class="k">Trips around Earth since launch</div><div class="v" id="orbits">-</div><div class="k" id="orbitsk"></div></div>
+      <div class="stat fun"><div class="k">One trip around Earth takes</div><div class="v" id="lap">-</div></div>
+      <div class="stat fun"><div class="k" id="sunrisesk">Sunrises a day</div><div class="v" id="sunrises">-</div><div class="k">and the same number of sunsets</div></div>
+    </div>
+    <p class="muted" style="margin:10px 0 0">The dashed line is where it's been, the solid line is where it's going next. The circle shows everywhere on Earth that can see it right now. The dark part of the map is where it's night, and ☀️ is where the Sun is straight overhead.</p>
   </section>
 
   <section class="card">
-    <h2>Next time you can see it</h2>
-    <div id="next"><p class="muted">Set your location below to see when the ISS flies over you.</p></div>
-    <h2 style="margin-top:22px">Who's on board</h2>
-    <div id="crew" class="muted">Loading…</div>
+    <h2 id="nexttitle">Next time you can see it</h2>
+    <div id="next"><p class="muted">Set your location below to see when it flies over you.</p></div>
+    <h2 style="margin-top:22px" id="skytitle">🧭 Sky chart</h2>
+    <div id="sky"><p class="muted">The path across your sky shows up here once your location is set.</p></div>
+    <p class="muted" id="skyhelp" style="display:none">Like a compass: the edge of the circle is the horizon, the middle is straight overhead. The <b style="color:var(--accent)">bright line</b> is the part you can see, the dashed part is too dark or too bright to see. Tap any pass in the table to see its path.</p>
   </section>
 
   <section class="card full">
-    <h2>Upcoming passes over your home (next 4 days)</h2>
+    <h2 id="passtitle">Upcoming passes over your home (next 4 days)</h2>
     <div id="passes"><p class="muted">Set your location below.</p></div>
   </section>
 
   <section class="card">
-    <h2>Your location</h2>
-    <p class="muted">Use your town's coordinates, not your exact address. Two decimal places (about 1 km) is plenty. <a style="color:var(--accent)" href="https://github.com/akshajtripathi24-ui/pi-space-station-tracker/blob/main/docs/03-set-your-location.md" target="_blank">How to find them</a></p>
+    <h2>📺 Live view from space</h2>
+    <div class="video" id="video">
+      <button id="playvideo" style="margin:0">▶ Start NASA's live video</button>
+      <p class="muted" style="margin:10px 0 0">Live video from NASA's YouTube channel</p>
+    </div>
+    <p class="muted">It's live, so sometimes it's black (the station is on the night side of Earth, which happens every 45 minutes), shows "please stand by", or isn't streaming at all. That's normal. You can paste a different live video link in the settings below. <a href="https://www.youtube.com/@NASA/streams" target="_blank" rel="noopener">NASA's live videos on YouTube</a></p>
+  </section>
+
+  <section class="card">
+    <h2>👩‍🚀 Who's on board</h2>
+    <div id="crew" class="muted">Loading…</div>
+  </section>
+
+  <section class="card">
+    <h2>Your location and settings</h2>
+    <p class="muted">Use your town's coordinates, not your exact address. Two decimal places (about 1 km) is plenty. <a href="https://github.com/akshajtripathi24-ui/pi-space-station-tracker/blob/main/docs/03-set-your-location.md" target="_blank">How to find them</a></p>
     <label for="place">Name (just for you, like "Home")</label><input type="text" id="place" maxlength="60">
     <div class="row">
       <div><label for="lat">Latitude</label><input type="number" id="lat" step="0.01" placeholder="e.g. 40.71"></div>
@@ -87,8 +136,19 @@ footer a{color:var(--muted)}
       <div><label for="minel">Lowest height to count (°)</label><input type="number" id="minel" min="0" max="60"></div>
       <div><label for="mins">Alert me this many minutes before</label><input type="number" id="mins" min="1" max="60"></div>
     </div>
-    <div class="check"><input type="checkbox" id="alerts"><label for="alerts" style="margin:0">Send phone alerts</label></div>
-    <div class="check"><input type="checkbox" id="visonly"><label for="visonly" style="margin:0">Only alert when I can actually see it (dark sky, ISS in sunlight)</label></div>
+    <hr>
+    <div class="check"><input type="checkbox" id="alerts"><label for="alerts" style="margin:0">Send phone alerts before a pass</label></div>
+    <div class="check"><input type="checkbox" id="visonly"><label for="visonly" style="margin:0">Only alert when I can actually see it (dark sky, spacecraft in sunlight)</label></div>
+    <label>Send alerts for</label>
+    <div class="checks" id="alertsats">
+      <label class="check" style="margin:0"><input type="checkbox" value="iss"> ISS</label>
+      <label class="check" style="margin:0"><input type="checkbox" value="tiangong"> Tiangong</label>
+      <label class="check" style="margin:0"><input type="checkbox" value="hubble"> Hubble</label>
+    </div>
+    <div class="check"><input type="checkbox" id="summary"><label for="summary" style="margin:0">Morning summary of the day's visible passes at</label> <select id="sumhour" aria-label="Morning summary time"></select></div>
+    <div class="check"><input type="checkbox" id="weather"><label for="weather" style="margin:0">Check the cloud forecast for each pass</label></div>
+    <label for="videourl">Live video link (optional: leave empty for NASA's live video)</label>
+    <input type="text" id="videourl" placeholder="https://www.youtube.com/watch?v=...">
     <button id="save">Save</button>
     <div class="msg" id="savemsg"></div>
   </section>
@@ -99,18 +159,23 @@ footer a{color:var(--muted)}
     <p class="muted">2. In the app, tap <b>+</b> and subscribe to this topic:</p>
     <p><code id="topic">-</code> <button class="ghost" id="copy" style="margin:0 0 0 6px;padding:5px 10px">Copy</button></p>
     <p class="muted">3. Tap the button and check your phone:</p>
-    <button id="test">Send test notification</button> <button class="ghost" id="newtopic">New topic</button>
+    <button id="test">Send test notification</button> <button class="ghost" id="testsum">Send test morning summary</button>
     <div class="msg" id="testmsg"></div>
+    <button class="ghost" id="newtopic">New topic</button>
     <p class="muted" style="margin-top:14px">Keep the topic private: anyone who knows it can read your alerts.</p>
   </section>
 </main>
 <footer>
-  Orbit data from <a href="https://celestrak.org" target="_blank">CelesTrak</a> · crew list from Open Notify · map © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors.<br>
+  Orbit data from <a href="https://celestrak.org" target="_blank">CelesTrak</a> · crew list from Open Notify · cloud forecast from <a href="https://open-meteo.com" target="_blank">Open-Meteo</a> · map © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors · live video from NASA.<br>
   A student project, not affiliated with NASA. <a href="https://github.com/akshajtripathi24-ui/pi-space-station-tracker" target="_blank">Code and guide on GitHub</a>
 </footer>
 <script>
 const $ = id => document.getElementById(id);
 const api = (p, opt) => fetch(p, opt).then(async r => { const j = await r.json(); if (!r.ok) throw new Error(j.error || r.status); return j; });
+const store = {   // remembers your choices in this browser (works without it too)
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+};
 const fmtTime = t => new Date(t * 1000).toLocaleTimeString([], {hour: 'numeric', minute: '2-digit'});
 const fmtDay = t => {
   const d = new Date(t * 1000), today = new Date(), tom = new Date(); tom.setDate(today.getDate() + 1);
@@ -118,18 +183,69 @@ const fmtDay = t => {
   if (d.toDateString() === tom.toDateString()) return 'Tomorrow';
   return d.toLocaleDateString([], {weekday: 'short', month: 'short', day: 'numeric'});
 };
-const heightWords = el => el >= 70 ? 'almost straight up' : el >= 40 ? 'high in the sky' : el >= 20 ? 'halfway up' : 'low, near the horizon';
-const ocean = (lat, lon) => {   // a rough name for where it is, so the stat isn't just numbers
-  const ns = lat >= 0 ? 'N' : 'S', ew = lon >= 0 ? 'E' : 'W';
-  return `${Math.abs(lat).toFixed(1)}°${ns}, ${Math.abs(lon).toFixed(1)}°${ew}`;
+const fmtLeft = s => {
+  s = Math.max(0, Math.round(s));
+  if (s < 3600) return `${Math.floor(s / 60)}m ${s % 60}s`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ${Math.floor(s % 3600 / 60)}m`;
+  return `${Math.floor(s / 86400)}d ${Math.floor(s % 86400 / 3600)}h`;
 };
+const heightWords = el => el >= 70 ? 'almost straight up' : el >= 40 ? 'high in the sky' : el >= 20 ? 'halfway up' : 'low, near the horizon';
+const where = (lat, lon) => `${Math.abs(lat).toFixed(1)}°${lat >= 0 ? 'N' : 'S'}, ${Math.abs(lon).toFixed(1)}°${lon >= 0 ? 'E' : 'W'}`;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+
+// ---- km or miles
+let units = store.get('units') === 'mi' ? 'mi' : 'km';
+const MI = 0.621371;
+const dist = km => units === 'mi' ? Math.round(km * MI).toLocaleString() + ' mi' : Math.round(km).toLocaleString() + ' km';
+const speed = kmh => units === 'mi' ? Math.round(kmh * MI).toLocaleString() + ' mph' : Math.round(kmh).toLocaleString() + ' km/h';
+function setUnits(u) {
+  units = u; store.set('units', u);
+  document.querySelectorAll('#unitpick button').forEach(b => b.classList.toggle('on', b.dataset.u === u));
+  if (lastNow) showNow(lastNow);
+}
+document.querySelectorAll('#unitpick button').forEach(b => b.onclick = () => setUnits(b.dataset.u));
+
+// ---- which spacecraft
+const ICON = {iss: '🛰️', tiangong: '🛰️', hubble: '🔭'};
+let sat = ['iss', 'tiangong', 'hubble'].includes(store.get('sat')) ? store.get('sat') : 'iss';
+let sats = {iss: {name: 'ISS', has_crew: true}, tiangong: {name: 'Tiangong', has_crew: true}, hubble: {name: 'Hubble', has_crew: false}};
+const satName = () => (sats[sat] || {}).name || sat;
+const theName = () => sat === 'iss' ? 'the ISS' : satName();   // "the ISS", but just "Tiangong" and "Hubble"
+function pickSat(s) {
+  sat = s; store.set('sat', s);
+  document.querySelectorAll('#satpick button').forEach(b => b.classList.toggle('on', b.dataset.sat === s));
+  $('maptitle').textContent = `Where is ${theName()} right now?`;
+  $('nexttitle').textContent = `Next time you can see ${theName()}`;
+  $('passtitle').textContent = `Upcoming ${satName()} passes over your home (next 4 days)`;
+  issMarker.setIcon(L.divIcon({className: 'iss-icon', html: ICON[s], iconSize: [30, 30]}));
+  firstFix = true; lastNow = null; passes = []; chosen = null; skyKey = null;
+  ['pos', 'alt', 'spd', 'sun', 'today', 'orbits', 'lap', 'sunrises'].forEach(id => $(id).textContent = '-');
+  $('passes').innerHTML = '<p class="muted">Working out the passes…</p>';
+  loadNow(); loadTrack(); loadCrew(); loadPasses().then(showNext);
+}
+document.querySelectorAll('#satpick button').forEach(b => b.onclick = () => pickSat(b.dataset.sat));
 
 // ---- map
 const map = L.map('map', {worldCopyJump: true, minZoom: 1}).setView([20, 0], 2);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 7, attribution: '© OpenStreetMap contributors'}).addTo(map);
-const issMarker = L.marker([0, 0], {icon: L.divIcon({className: 'iss-icon', html: '🛰️', iconSize: [30, 30]})}).addTo(map);
+const night = L.layerGroup().addTo(map);
+const sunMarker = L.marker([0, 0], {icon: L.divIcon({className: 'sun-icon', html: '☀️', iconSize: [22, 22]}), interactive: false}).addTo(map);
 const footprint = L.circle([0, 0], {radius: 2200e3, color: '#22d3ee', weight: 1, fillOpacity: 0.06}).addTo(map);
-let pastLine = L.layerGroup().addTo(map), nextLine = L.layerGroup().addTo(map), homeMarker = null, firstFix = true;
+const issMarker = L.marker([0, 0], {icon: L.divIcon({className: 'iss-icon', html: '🛰️', iconSize: [30, 30]}), zIndexOffset: 1000}).addTo(map);
+let pastLine = L.layerGroup().addTo(map), nextLine = L.layerGroup().addTo(map), homeMarker = null, firstFix = true, nightDrawn = 0;
+
+function drawNight(sunLat, sunLon) {   // shade the half of Earth facing away from the Sun
+  const d = (Math.abs(sunLat) < 0.01 ? 0.01 : sunLat) * Math.PI / 180, pole = d > 0 ? -90 : 90, edge = [];
+  for (let lon = -180; lon <= 180; lon += 2) {     // the line between day and night (the "terminator")
+    const h = (lon - sunLon) * Math.PI / 180;
+    edge.push([Math.atan(-Math.cos(h) / Math.tan(d)) * 180 / Math.PI, lon]);
+  }
+  edge.push([pole, 180], [pole, -180]);
+  night.clearLayers();
+  [-360, 0, 360].forEach(off => L.polygon(edge.map(([a, b]) => [a, b + off]),
+    {stroke: false, fillColor: '#000814', fillOpacity: 0.38, interactive: false}).addTo(night));
+  sunMarker.setLatLng([sunLat, sunLon]);
+}
 
 function splitAtDateLine(pts) {  // stop the line jumping across the whole map at ±180°
   const parts = []; let cur = [];
@@ -142,106 +258,271 @@ function splitAtDateLine(pts) {  // stop the line jumping across the whole map a
 }
 
 async function loadTrack() {
+  const s0 = sat;
   try {
-    const {points} = await api('/api/track');
+    const {points} = await api('/api/track?sat=' + s0);
+    if (s0 !== sat) return;
     const now = Date.now() / 1000;
     pastLine.clearLayers(); nextLine.clearLayers();
     splitAtDateLine(points.filter(p => p[2] <= now)).forEach(s => L.polyline(s, {color: '#64748b', weight: 2, dashArray: '6 6'}).addTo(pastLine));
     splitAtDateLine(points.filter(p => p[2] >= now - 30)).forEach(s => L.polyline(s, {color: '#22d3ee', weight: 3}).addTo(nextLine));
-  } catch (e) {}
+  } catch (e) { pastLine.clearLayers(); nextLine.clearLayers(); }
 }
 
+// ---- live position and stats
+let lastNow = null;
+function showNow(d) {
+  const s = d.now;
+  issMarker.setLatLng([s.lat, s.lon]);
+  footprint.setLatLng([s.lat, s.lon]);
+  footprint.setRadius(6371e3 * Math.acos(6371 / (6371 + s.alt_km)));
+  if (firstFix) { map.setView([s.lat, s.lon], 2); firstFix = false; }
+  if (Date.now() - nightDrawn > 30000) { drawNight(s.subsolar[0], s.subsolar[1]); nightDrawn = Date.now(); }
+  $('pos').textContent = where(s.lat, s.lon);
+  $('alt').textContent = dist(s.alt_km);
+  $('spd').textContent = speed(s.speed_kmh);
+  $('sun').textContent = s.sunlit ? '☀️ In sunlight' : '🌑 In Earth\'s shadow';
+  $('today').textContent = dist(s.km_today);
+  $('todayk').textContent = `since midnight: ${(s.km_today / 40075).toFixed(1)} times around Earth`;
+  $('orbits').textContent = 'about ' + (Math.round(s.orbits_since_launch / 100) * 100).toLocaleString();
+  const launched = sats[sat] && sats[sat].launched;
+  $('orbitsk').textContent = launched ? 'launched ' + new Date(launched + 'T12:00:00Z').toLocaleDateString([], {year: 'numeric', month: 'short', day: 'numeric'}) : '';
+  $('lap').textContent = Math.round(s.orbit_minutes) + ' min';
+  $('sunrises').textContent = Math.round(s.sunrises_per_day);
+  $('sunrisesk').textContent = sats[sat] && sats[sat].has_crew ? 'Sunrises the crew sees each day' : 'Sunrises it flies through each day';
+  if (d.from_home) {
+    const h = d.from_home;
+    $('homekm').textContent = dist(h.km) + ' away';
+    $('home').textContent = h.el > 0 ? `☝️ ${h.el}° up, look ${h.dir}!` : 'Below horizon';
+  }
+  if (d.home && d.home.lat != null) {
+    if (!homeMarker) homeMarker = L.marker([d.home.lat, d.home.lon], {icon: L.divIcon({className: 'home-icon', html: '🏠', iconSize: [22, 22]})}).addTo(map);
+    homeMarker.setLatLng([d.home.lat, d.home.lon]);
+  }
+  const st = $('status');
+  if (d.tle_error) { st.textContent = '⚠️ Using saved orbit data'; st.className = 'pill warn'; st.title = d.tle_error; }
+  else { st.textContent = '● Live'; st.className = 'pill'; st.title = d.tle_age_h != null ? `Orbit data is ${d.tle_age_h} hours old` : ''; }
+}
+function showSunCountdown() {   // the crew's next sunrise or sunset, every second
+  if (!lastNow || !lastNow.now.next_sun) { $('sunnext').textContent = ''; return; }
+  const n = lastNow.now.next_sun, left = n.time - Date.now() / 1000;
+  const who = sats[sat] && sats[sat].has_crew ? "crew's " : '';
+  $('sunnext').textContent = left <= 0 ? `${n.type === 'sunset' ? '🌇' : '🌅'} ${n.type} now!` :
+    `${n.type === 'sunset' ? '🌇 ' + who + 'sunset' : '🌅 ' + who + 'sunrise'} in ${fmtLeft(left)}`;
+}
 async function loadNow() {
+  const s0 = sat;
   try {
-    const d = await api('/api/now'), s = d.iss;
-    issMarker.setLatLng([s.lat, s.lon]);
-    footprint.setLatLng([s.lat, s.lon]);
-    footprint.setRadius(6371e3 * Math.acos(6371 / (6371 + s.alt_km)));
-    if (firstFix) { map.setView([s.lat, s.lon], 2); firstFix = false; }
-    $('pos').textContent = ocean(s.lat, s.lon);
-    $('alt').textContent = Math.round(s.alt_km) + ' km';
-    $('spd').textContent = Math.round(s.speed_kmh).toLocaleString() + ' km/h';
-    $('sun').textContent = s.sunlit ? '☀️ In sunlight' : '🌑 In Earth\'s shadow';
-    if (d.from_home) {
-      const h = d.from_home;
-      $('homekm').textContent = h.km.toLocaleString() + ' km away';
-      $('home').textContent = h.el > 0 ? `☝️ ${h.el}° up, look ${h.dir}!` : `Below horizon`;
-    }
-    if (d.home && d.home.lat != null) {
-      if (!homeMarker) homeMarker = L.marker([d.home.lat, d.home.lon], {icon: L.divIcon({className: 'home-icon', html: '🏠', iconSize: [22, 22]})}).addTo(map);
-      homeMarker.setLatLng([d.home.lat, d.home.lon]);
-    }
-    const st = $('status');
-    if (d.tle_error) { st.textContent = '⚠️ Using saved orbit data'; st.className = 'pill warn'; st.title = d.tle_error; }
-    else { st.textContent = '● Live'; st.className = 'pill'; st.title = d.tle_age_h != null ? `Orbit data is ${d.tle_age_h} hours old` : ''; }
+    const d = await api('/api/now?sat=' + s0);
+    if (s0 !== sat) return;
+    lastNow = d; showNow(d);
   } catch (e) {
+    if (s0 !== sat) return;
     $('status').textContent = '⚠️ ' + e.message; $('status').className = 'pill warn';
   }
 }
 
-let passes = [];
-async function loadPasses() {
-  try { passes = (await api('/api/passes')).passes; } catch (e) { passes = []; }
-  if (!passes.length) return;
-  $('passes').innerHTML = '<table><tr><th>Day</th><th>Time</th><th>Highest</th><th>Where to look</th><th>Length</th><th>Can you see it?</th></tr>' +
-    passes.slice(0, 20).map(p => `<tr><td>${fmtDay(p.start)}</td><td>${fmtTime(p.start)}</td><td>${p.max_el}°</td>` +
-      `<td>${p.start_dir} → ${p.end_dir}</td><td>${p.minutes} min</td>` +
-      `<td>${p.visible ? '<span class="tag yes">👀 Yes</span>' : '<span class="tag no">No</span>'}</td></tr>`).join('') + '</table>';
-}
+// ---- passes, clouds and the countdown
+let passes = [], chosen = null, hasHome = false;
+const cloudHTML = c => c == null ? '<span class="muted">-</span>' :
+  c < 30 ? `<span class="cloud clear" title="${c}% cloud cover">☀️ Clear</span>` :
+  c < 70 ? `<span class="cloud part" title="${c}% cloud cover">⛅ Partly cloudy</span>` :
+  `<span class="cloud cloudy" title="${c}% cloud cover">☁️ Cloudy</span>`;
+const cloudWords = c => c == null ? '' : c < 30 ? `☀️ Clear skies (${c}% clouds)` : c < 70 ? `⛅ Partly cloudy (${c}% clouds)` : `☁️ Cloudy (${c}% clouds), you might not see it`;
 
+async function loadPasses() {
+  const s0 = sat;
+  let d;
+  try { d = await api('/api/passes?sat=' + s0); } catch (e) { return; }
+  if (s0 !== sat) return;
+  passes = d.passes;
+  renderPasses();
+}
+function renderPasses() {
+  if (!hasHome) { $('passes').innerHTML = '<p class="muted">Set your location below.</p>'; return; }
+  if (!passes.length) {
+    $('passes').innerHTML = sat === 'hubble'
+      ? '<p class="muted">Hubble doesn\'t get high enough over your home in the next 4 days. It orbits close to the equator (it never goes farther than 28.5° north or south), so the farther you live from the equator, the lower it stays. Try a lower "Lowest height to count".</p>'
+      : `<p class="muted">No passes found in the next 4 days.</p>`;
+    return;
+  }
+  $('passes').innerHTML = '<div class="tablewrap"><table><tr><th>Day</th><th>Time</th><th>Highest</th><th>Where to look</th><th>Length</th><th>Can you see it?</th><th>Clouds</th><th></th></tr>' +
+    passes.slice(0, 20).map((p, i) => `<tr class="pass${chosen && chosen.start === p.start ? ' sel' : ''}" data-i="${i}"><td>${fmtDay(p.start)}</td><td>${fmtTime(p.visible ? p.vis_start : p.start)}</td><td>${p.max_el}°</td>` +
+      `<td>${p.start_dir} → ${p.end_dir}</td><td>${p.minutes} min</td>` +
+      `<td>${p.visible ? '<span class="tag yes">👀 Yes</span>' : '<span class="tag no">No</span>'}</td>` +
+      `<td>${p.visible ? cloudHTML(p.clouds) : '<span class="muted">-</span>'}</td><td class="muted">🧭 Sky chart</td></tr>`).join('') + '</table></div>';
+}
+$('passes').addEventListener('click', e => {
+  const tr = e.target.closest('tr.pass'); if (!tr) return;
+  chosen = passes[+tr.dataset.i]; renderPasses(); drawSky();
+  $('skytitle').scrollIntoView({behavior: 'smooth', block: 'start'});
+});
+
+function nextVisible() {
+  const now = Date.now() / 1000;
+  return passes.find(p => p.visible && p.vis_end > now);
+}
 function showNext() {
-  const now = Date.now() / 1000, next = passes.find(p => p.visible && (p.vis_end || p.end) > now);
-  if (!passes.length) return;
-  if (!next) { $('next').innerHTML = '<p class="muted">No visible passes in the next 4 days. The ISS still flies over, but in daylight or in Earth\'s shadow. Check back soon!</p>'; return; }
+  if (!hasHome) return;
+  const now = Date.now() / 1000, next = nextVisible();
+  if (chosen && chosen.end < now) chosen = null;
+  drawSky();
+  if (!passes.length) { $('next').innerHTML = '<p class="muted">No passes over your home in the next 4 days.</p>'; return; }
+  if (!next) { $('next').innerHTML = `<p class="muted">No visible passes in the next 4 days. ${esc(theName().replace(/^t/, 'T'))} still flies over, but in daylight or in Earth's shadow. Check back soon!</p>`; return; }
   const start = next.vis_start, left = start - now;
-  const when = left <= 0 ? '👀 Look up now!' : left < 3600 ? `in ${Math.floor(left / 60)}m ${Math.floor(left % 60)}s` :
-    `in ${Math.floor(left / 3600)}h ${Math.floor(left % 3600 / 60)}m`;
+  const when = left <= 0 ? '👀 Look up now!' : 'in ' + fmtLeft(left);
   $('next').innerHTML = `<div class="big">${when}</div>
     <p><b>${fmtDay(start)} at ${fmtTime(start)}</b></p>
     <p class="muted">Look <b>${next.vis_start_dir}</b>. It climbs to <b>${next.max_el}°</b> (${heightWords(next.max_el)}) and fades out in the <b>${next.vis_end_dir}</b> at ${fmtTime(next.vis_end)}.</p>
+    ${next.clouds != null ? `<p class="muted">Forecast: ${cloudWords(next.clouds)}</p>` : ''}
     <p class="muted">You'll see a bright, steady dot moving fast across the sky. No blinking lights, so it's not a plane!</p>`;
 }
 
+// ---- sky chart: the path across YOUR sky, like a compass
+let skyKey = null, skyPts = null;
+async function drawSky() {
+  const now = Date.now() / 1000;
+  const p = chosen || nextVisible() || passes.find(q => q.end > now);
+  if (!p) { $('sky').innerHTML = '<p class="muted">No pass to show yet.</p>'; $('skyhelp').style.display = 'none'; return; }
+  const key = sat + p.start;
+  if (key !== skyKey) {
+    skyKey = key; skyPts = null;
+    try { skyPts = (await api(`/api/skypath?sat=${sat}&start=${p.start}&end=${p.end}`)).points; } catch (e) { skyKey = null; return; }
+    if (key !== skyKey || !skyPts) return;
+  } else if (!skyPts) {
+    return;   // still downloading the path
+  } else if (!(now >= p.start && now <= p.end) && $('sky').querySelector('svg')) {
+    return;   // nothing moves on the chart unless the pass is happening right now
+  }
+  $('skytitle').textContent = `🧭 Sky chart: ${fmtDay(p.start)} at ${fmtTime(p.visible ? p.vis_start : p.start)}`;
+  $('sky').innerHTML = skySVG(skyPts, p, now);
+  $('skyhelp').style.display = '';
+}
+function skySVG(pts, p, now) {
+  const C = 140, R = 112;
+  const xy = (az, el) => { const r = R * (90 - Math.max(0, el)) / 90, a = az * Math.PI / 180; return [C + r * Math.sin(a), C - r * Math.cos(a)]; };
+  const f = a => a[0].toFixed(1) + ',' + a[1].toFixed(1);
+  let g = `<svg class="sky" viewBox="0 0 280 280" role="img" aria-label="Sky chart of the pass">
+    <defs><marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#22d3ee"/></marker></defs>
+    <circle class="ring" cx="${C}" cy="${C}" r="${R}"/>
+    <circle class="grid" cx="${C}" cy="${C}" r="${R * 2 / 3}"/><circle class="grid" cx="${C}" cy="${C}" r="${R / 3}"/>
+    <line class="grid" x1="${C}" y1="${C - R}" x2="${C}" y2="${C + R}"/><line class="grid" x1="${C - R}" y1="${C}" x2="${C + R}" y2="${C}"/>
+    <text class="dir" x="${C}" y="${C - R - 8}" text-anchor="middle">N</text><text class="dir" x="${C + R + 10}" y="${C + 5}" text-anchor="middle">E</text>
+    <text class="dir" x="${C}" y="${C + R + 19}" text-anchor="middle">S</text><text class="dir" x="${C - R - 10}" y="${C + 5}" text-anchor="middle">W</text>
+    <text x="${C + 3}" y="${C + R * 2 / 3 - 3}">30°</text><text x="${C + 3}" y="${C + R / 3 - 3}">60°</text><text x="${C + 3}" y="${C - 3}">overhead</text>`;
+  const segs = []; let cur = null;   // split the path into "can see it" and "can't see it" parts
+  pts.forEach(q => {
+    const v = !!q[3];
+    if (!cur || cur.v !== v) { const last = cur && cur.p[cur.p.length - 1]; cur = {v, p: last ? [last] : []}; segs.push(cur); }
+    cur.p.push(xy(q[0], q[1]));
+  });
+  segs.forEach((s, i) => g += `<polyline class="${s.v ? 'vis' : 'dim'}" points="${s.p.map(f).join(' ')}"${s.v ? ' marker-end="url(#arrow)"' : ''}/>`);
+  const seen = pts.filter(q => q[3]), top = (seen.length ? seen : pts).reduce((a, b) => b[1] > a[1] ? b : a);   // highest point you can see
+  const a = seen.length ? seen[0] : pts[0], z = seen.length ? seen[seen.length - 1] : pts[pts.length - 1];
+  const [ax, ay] = xy(a[0], a[1]), [zx, zy] = xy(z[0], z[1]), [tx, ty] = xy(top[0], top[1]);
+  g += `<circle cx="${ax.toFixed(1)}" cy="${ay.toFixed(1)}" r="5" fill="#4ade80" stroke="#0b1222" stroke-width="2"/>` +
+    `<circle cx="${zx.toFixed(1)}" cy="${zy.toFixed(1)}" r="4" fill="#e2e8f0" stroke="#0b1222" stroke-width="2"/>`;
+  if (Math.hypot(tx - ax, ty - ay) > 24 && Math.hypot(tx - zx, ty - zy) > 24)   // only if it doesn't cover the other marks
+    g += `<text class="lbl" x="${tx.toFixed(1)}" y="${(ty - 8).toFixed(1)}" text-anchor="middle">⬆ ${Math.round(top[1])}°</text>`;
+  if (now >= p.start && now <= p.end) {   // it's happening right now: show where it is
+    const k = Math.min(pts.length - 1, Math.max(0, Math.round((now - pts[0][2]) / 5)));
+    const [x, y] = xy(pts[k][0], pts[k][1]);
+    g += `<text x="${x.toFixed(1)}" y="${(y + 7).toFixed(1)}" text-anchor="middle" style="font-size:20px">${ICON[sat]}</text>`;
+  }
+  g += '</svg>';
+  const dir = q => COMPASS[Math.round(q[0] / 22.5) % 16];
+  g += seen.length
+    ? `<p class="muted" style="text-align:center;margin:6px 0 0"><b style="color:var(--good)">●</b> Appears <b>${fmtTime(a[2])}</b> in the <b>${dir(a)}</b> → highest <b>${Math.round(top[1])}°</b> → gone <b>${fmtTime(z[2])}</b> in the <b>${dir(z)}</b></p>`
+    : `<p class="muted" style="text-align:center;margin:6px 0 0"><b style="color:var(--good)">●</b> Rises <b>${fmtTime(a[2])}</b> in the <b>${dir(a)}</b> → highest <b>${Math.round(top[1])}°</b> → sets <b>${fmtTime(z[2])}</b> in the <b>${dir(z)}</b>. Not visible this time.</p>`;
+  return g;
+}
+const COMPASS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+
+// ---- crew
 async function loadCrew() {
+  const s0 = sat;
   try {
-    const {iss_crew} = await api('/api/crew');
-    $('crew').innerHTML = iss_crew.length ? `<b style="color:var(--text)">${iss_crew.length} people</b> are living on the ISS right now:<br>` + iss_crew.join(', ') : 'Crew list unavailable right now.';
+    const {crew} = await api('/api/crew?sat=' + s0);
+    if (s0 !== sat) return;
+    if (crew === null) $('crew').innerHTML = 'Nobody! Hubble is a robot telescope. Astronauts last visited it in 2009 on the Space Shuttle to repair and upgrade it.';
+    else $('crew').innerHTML = crew.length ? `<b style="color:var(--text)">${crew.length} people</b> are living on ${esc(theName())} right now:<br>` + crew.map(esc).join(', ') : 'Crew list unavailable right now.';
   } catch (e) { $('crew').textContent = 'Crew list unavailable right now.'; }
 }
 
+// ---- live video
+function embedUrl(u) {
+  if (!u) return 'https://www.youtube.com/embed/live_stream?channel=UCLA_DiR1FfKNvjuUpBHmylQ&autoplay=1&mute=1';
+  try {
+    const x = new URL(u); let id = null;
+    if (/(^|\.)youtube\.com$/.test(x.hostname)) {
+      if (x.pathname === '/watch') id = x.searchParams.get('v');
+      else { const m = x.pathname.match(/^\/(live|embed|shorts)\/([\w-]{6,})/); if (m) id = m[2]; }
+    } else if (x.hostname === 'youtu.be') id = x.pathname.slice(1);
+    if (id) return `https://www.youtube.com/embed/${encodeURIComponent(id)}?autoplay=1&mute=1`;
+    return x.protocol === 'https:' ? x.href : null;
+  } catch (e) { return null; }
+}
+let videoUrl = '';
+$('playvideo').onclick = () => {
+  const src = embedUrl(videoUrl);
+  if (!src) { $('video').insertAdjacentHTML('beforeend', '<p class="muted">That video link doesn\'t work. Check it in the settings.</p>'); return; }
+  $('video').innerHTML = '';
+  const f = document.createElement('iframe');
+  f.src = src; f.title = 'Live view from space';
+  f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen'; f.allowFullscreen = true;
+  f.referrerPolicy = 'strict-origin-when-cross-origin';
+  $('video').appendChild(f);
+};
+
+// ---- settings
+for (let h = 0; h < 24; h++) $('sumhour').insertAdjacentHTML('beforeend',
+  `<option value="${h}">${new Date(2000, 0, 1, h).toLocaleTimeString([], {hour: 'numeric', minute: '2-digit'})}</option>`);
 async function loadSettings() {
   const c = await api('/api/settings');
   $('place').value = c.place || ''; $('lat').value = c.lat ?? ''; $('lon').value = c.lon ?? '';
   $('minel').value = c.min_elevation; $('mins').value = c.alert_minutes;
   $('alerts').checked = c.alerts_on; $('visonly').checked = c.visible_only; $('topic').textContent = c.ntfy_topic;
+  document.querySelectorAll('#alertsats input').forEach(b => b.checked = c.alert_sats.includes(b.value));
+  $('summary').checked = c.summary_on; $('sumhour').value = c.summary_hour; $('weather').checked = c.weather_on;
+  $('videourl').value = c.video_url || ''; videoUrl = c.video_url || '';
+  hasHome = c.lat != null && c.lon != null;
 }
-
 $('save').onclick = async () => {
   $('savemsg').textContent = 'Saving…';
+  const v = $('videourl').value.trim();
+  if (v && !embedUrl(v)) { $('savemsg').textContent = '❌ The video link must start with https://'; return; }
   try {
-    await api('/api/settings', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
+    const c = await api('/api/settings', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
       place: $('place').value, lat: $('lat').value, lon: $('lon').value, min_elevation: $('minel').value,
-      alert_minutes: $('mins').value, alerts_on: $('alerts').checked, visible_only: $('visonly').checked})});
+      alert_minutes: $('mins').value, alerts_on: $('alerts').checked, visible_only: $('visonly').checked,
+      alert_sats: [...document.querySelectorAll('#alertsats input:checked')].map(b => b.value),
+      summary_on: $('summary').checked, summary_hour: $('sumhour').value, weather_on: $('weather').checked, video_url: v})});
+    hasHome = c.lat != null && c.lon != null; videoUrl = c.video_url || '';
     $('savemsg').textContent = '✅ Saved! Working out your passes…';
+    skyKey = null; chosen = null;
     await loadPasses(); showNext(); loadNow();
     $('savemsg').textContent = '✅ Saved!';
   } catch (e) { $('savemsg').textContent = '❌ ' + e.message; }
 };
-$('test').onclick = async () => {
+async function testSend(path, btn) {
   $('testmsg').textContent = 'Sending…';
-  try { await api('/api/test-alert', {method: 'POST'}); $('testmsg').textContent = '✅ Sent! Check your phone.'; }
+  try { await api(path, {method: 'POST'}); $('testmsg').textContent = '✅ Sent! Check your phone.'; }
   catch (e) { $('testmsg').textContent = '❌ ' + e.message; }
-};
+}
+$('test').onclick = () => testSend('/api/test-alert');
+$('testsum').onclick = () => testSend('/api/test-summary');
 $('newtopic').onclick = async () => {
   if (!confirm('Make a new topic? You will need to subscribe to the new one in the ntfy app.')) return;
   const c = await api('/api/new-topic', {method: 'POST'}); $('topic').textContent = c.ntfy_topic;
 };
 $('copy').onclick = () => { navigator.clipboard && navigator.clipboard.writeText($('topic').textContent); $('copy').textContent = 'Copied!'; setTimeout(() => $('copy').textContent = 'Copy', 1500); };
 
-loadSettings(); loadNow(); loadTrack(); loadCrew();
-loadPasses().then(showNext);
+// ---- start
+setUnits(units);
+api('/api/sats').then(s => { sats = s; pickSat(sat); }).catch(() => pickSat(sat));
+loadSettings().then(() => loadPasses().then(showNext)).catch(() => {});
 setInterval(loadNow, 2000);
-setInterval(showNext, 1000);
+setInterval(() => { showNext(); showSunCountdown(); }, 1000);
 setInterval(loadTrack, 60000);
 setInterval(() => loadPasses().then(showNext), 120000);
 </script>

@@ -64,6 +64,15 @@ bash setup-autostart.sh
 **Step 10. Go see it!** Read [5. How to spot the ISS](05-spot-the-iss.md), then wait for a pass marked **👀 Yes**.
 ✅ You're done when you've seen a bright dot glide across the sky. 🎉
 
+**Step 11. Try the extras (optional).**
+- Tap **Tiangong** or **Hubble** at the top to track China's space station or the Hubble telescope.
+- Tap **miles** if you prefer miles to kilometers.
+- Tap any pass in the table to see its **🧭 sky chart**.
+- Press **▶ Start NASA's live video** to watch Earth from space.
+- Tick **Morning summary** in the settings to get the day's passes each morning.
+
+✅ You're done when you've found your favorite. 🛰️
+
 ---
 
 **Stuck?** Check [7. Troubleshooting](07-troubleshooting.md). Curious what went wrong while building it? See the [build log](08-build-log.md).
